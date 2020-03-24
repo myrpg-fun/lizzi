@@ -1,0 +1,27 @@
+{
+  "name": "lizzi",
+  "version": "0.1.0",
+  "description": "Node and Javascript lizzi (react) framework library",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/myrpg-fun/lizzi.git"
+  },
+  "keywords": [
+    "lizzi",
+    "react",
+    "framework",
+    "node.js",
+    "node",
+    "javascript"
+  ],
+  "author": "Stanislav Shishankin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/myrpg-fun/lizzi/issues"
+  },
+  "homepage": "https://github.com/myrpg-fun/lizzi#readme"
+}
