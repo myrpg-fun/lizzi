@@ -1,2 +1,2 @@
 # lizzi
-Node and Javascript lizzi (react) library
+Node and Javascript lizzi (react) framework library
