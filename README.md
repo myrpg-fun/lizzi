@@ -106,4 +106,5 @@ connection.on('connected', function(socket) {
 #### Add listeners to group
 `EventStack.add([eventListener, ...]);` add current _eventListener_ to group stack.
 
+#### Clear all listeners in group
 `EventStack.removeAll();` off all _eventListeners_ in group stack.
