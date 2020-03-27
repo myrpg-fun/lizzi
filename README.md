@@ -54,7 +54,7 @@ data.count += 10;
 * `target` is this instance
 
 #### Collection Variables
-`Collection.collection` get collection as **Array**.
+`Collection.collection` get collection elements as **Array**.
 
 `Collection.length` get size of collection.
 
