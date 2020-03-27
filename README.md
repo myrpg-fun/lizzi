@@ -69,7 +69,7 @@ myEmitter.emit('event', 'x', 'y');
 `Event.emit(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`, in the order they were registered, passing the supplied `arguments` to each.
 
 #### Enabling and disabling event
-`Event.enable(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`, in the order they were registered, passing the supplied `arguments` to each. After event enabled, new events listeners will called instantly after add.
+`Event.enable(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`. After event enabled, new events listeners will called instantly after add, passing the supplied `arguments` to each.
 
 `Event.disable(name[, ...arguments]);` disables event.
 
