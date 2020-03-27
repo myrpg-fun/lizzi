@@ -99,5 +99,11 @@ connection.on('connected', function(socket) {
 ```
 
 ### Class: EventListener
-#### Remove this listener
+#### Remove listener
 `EventListener.off();` removes current _eventListener_ from class.
+
+### Class: EventStack
+#### Add listeners to group
+`EventStack.add([eventListener, ...]);` add current _eventListener_ to group stack.
+
+`EventStack.removeAll();` off all _eventListeners_ in group stack.
