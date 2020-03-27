@@ -60,7 +60,7 @@ data.count += 10;
 
 ### Class: CFilter
 Collection filter used for sort and filter elements in Collections.
-#### Collection Variables
+#### In and out collections
 `new CFilter(collection)` set inner `collection`.
 
 `CFilter.setFilterFn(function)` filter/sort function.
