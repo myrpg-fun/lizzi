@@ -38,6 +38,7 @@ data.count = 99;
 ### Class: zzDataRef
 
 ### Class: Collection
+_This class inherits from the [Event](#class-event) class._
 #### Collection Events
 `add`, `remove` emit on add/remove every element in collection.
 * `element` is added/removed element
