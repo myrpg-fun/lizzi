@@ -1,7 +1,7 @@
 # lizzi
 Node and Javascript lizzi (reactive) framework.
 
-## Reactive Data
+## Reactive
 
 ### Class: Data
 _This class inherits from the [Event](#class-event) class._
