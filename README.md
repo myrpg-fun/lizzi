@@ -1,7 +1,7 @@
 # lizzi
 Node and Javascript lizzi (react) framework.
 
-## React Data
+## Reactive Data
 
 ### Class: Data
 #### Data Events
