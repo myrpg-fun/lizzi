@@ -45,13 +45,11 @@ myEmitter.emit('event', 'x', 'y');
 ```
 
 ### Class: Event
-#### Event.on(name, listener[, self]);
-* _name_ \<string> | \<symbol> the name of the event.
-* _listener_ \<Function> the callback function
-* _self_ \<object> this parameter to the callback function
+#### Event.on(_string_ name, _function_ listener[, _object_ self]);
+#### Event.on(`string` name, `function` listener[, `object` self]);
 * __Returns:__ \<EventListener>
   
-Adds the listener function to the end of the listeners array for the event named eventName. No checks are made to see if the listener has already been added. Multiple calls passing the same combination of eventName and listener will result in the listener being added, and called, multiple times.
+Adds the _listener_ function to the end of the listeners for the event named by _name_.
 
 #### Event.off(eventListener);
 #### Event.off([name][, function][, self]);
