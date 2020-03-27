@@ -74,7 +74,7 @@ let filter = new CollectionFilter(mainElements)
     .setFilterFn((elements) => elements.filter(el => el.count <= data.count))
     .to(viewElements);
     
-data.on('set:count', () => filter.refresh);
+data.on('set:count', () => filter.refresh());
 
 mainElements.add([
     {count: 0},
