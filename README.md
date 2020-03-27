@@ -45,15 +45,15 @@ myEmitter.emit('event', 'x', 'y');
 ```
 
 ### Class: Event
-#### Event.on
-_\<EventListener>_ Event.on(\<string> _name_, \<function> _listener_[, \<object> _self_]);
+#### Adding events
+`Event.on(_name_, _listener_[, _self_]);` adds the _listener_ function to the end of the listeners for the event named by _name_:
+* `name` is string name of event
+* `listener` is function callback
+* `self` is this parameter to the callback function
+* Returns: \<EventListener> is listener instance
 
-Adds the _listener_ function to the end of the listeners for the event named by _name_.
+#### Removing events
+`Event.off(eventListener);` removes current _eventListener_ from class.
 
-#### Event.off
-Event.off(\<EventListener> listener);
-
-Event.off([\<string> name][, \<function> listener][, \<object> self]);
-
-Remove all specified event listeners from class by eventListener or name or function or by self.
+`Event.off([name][, listener][, self]);` find and remove all specified event listeners from class by eventListener or name or function or by self.
 
