@@ -58,6 +58,43 @@ data.count += 10;
 
 `Collection.length` get size of collection.
 
+### Class: CFilter
+Collection filter used for sort and filter elements in Collections.
+#### Collection Variables
+`new CFilter(collection)` set inner `collection`.
+
+`CFilter.setFilterFn(function)` filter/sort function.
+
+`CFilter.to(collection)` add to filter outer `collection` to replace filtered array.
+
+```javascript
+let data = new Data;
+data.set({count: 0});
+
+let mainElements = new Collection;
+let viewElements = new Collection;
+
+let filter = new CFilter(mainElements)
+    .setFilterFn((elements) => elements.filter(el => el.count <= data.count))
+    .to(viewElements);
+    
+data.on('set:count', () => filter.refresh);
+
+mainElements.add([
+    {count: 0},
+    {count: 10},
+    {count: 20},
+    {count: 30},
+    {count: 5},
+]);
+
+data.count = 10;
+
+console.log(viewElements.collection);
+//Prints:
+//[{count: 0}, {count: 10}, {count: 5}]
+```
+
 ## Events
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
