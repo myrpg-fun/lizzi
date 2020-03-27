@@ -80,7 +80,7 @@ class ServerConnection extends Event{
     startConnection(){
         ...
         socket.on('open', function(){
-            this.enable('connected', this.socket);
+            this.enable('connected', socket);
         }.bing(this));
         
         socket.on('close', function(){
