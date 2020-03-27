@@ -52,21 +52,51 @@ myEmitter.emit('event', 'x', 'y');
 * `self` is this parameter to the callback function
 * Returns: \<EventListener> is listener instance
 
-`Event.once(name or [...array of names], listener[, self]);`  adds **one-time** _listener_ function for the event named _name_. The next time eventName is triggered, this listener is removed and then invoked.
+`Event.once(name or ...array, listener[, self]);`  adds **one-time** _listener_ function for the event named _name_. The next time eventName is triggered, this listener is removed and then invoked.
 
-`Event.prependListener(name or [...array of names], listener[, self]);` adds the _listener_ function to the _begining_ of the listeners for the event named by _name_.
+`Event.prependListener(name or ...array, listener[, self]);` adds the _listener_ function to the **begining** of the listeners for the event named by _name_.
 
-`Event.prependOnceListener(name or [...array of names], listener[, self]);` adds **one-time** _listener_ function to the _begining_ of the listeners for the event named by _name_.
+`Event.prependOnceListener(name or ...array, listener[, self]);` adds **one-time** _listener_ function to the **begining** of the listeners for the event named by _name_.
 
 #### Removing events
 `Event.off(eventListener);` removes current _eventListener_ from class.
 
-`Event.off(name or [...array of names][, listener][, self]);` find and remove all `name` event listeners from class filtered by `function` or by `self`.
+`Event.off(name or ...array[, listener][, self]);` find and remove all `name` event listeners from class filtered by `function` or by `self`.
 
 `Event.off([listener][, self]);` find and remove all specified event listeners from class by `function` or by `self`.
 
 #### Emitting event
+`Event.emit(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`, in the order they were registered, passing the supplied `arguments` to each.
 
+#### Enabling and disabling event
+`Event.enable(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`, in the order they were registered, passing the supplied `arguments` to each. After event enabled, new events listeners will called instantly after add.
+
+`Event.disable(name[, ...arguments]);` disables event.
+
+`Event.isEnabled(name);` returns true, if event enabled.
+
+```javascript
+class ServerConnection extends Event{
+    startConnection(){
+        ...
+        socket.on('open', function(){
+            this.enable('connected', this.socket);
+        }.bing(this));
+        
+        socket.on('close', function(){
+            this.disable('connected');
+        }.bing(this));
+        ...
+    }
+}
+
+const connection = new ServerConnection();
+
+connection.on('connected', function(socket) {
+    console.log('Connection is ready');
+});
+//connected will emit only when connection is opened (on connection after or if connected before)
+```
 
 ### Class: EventListener
 #### Remove this listener
