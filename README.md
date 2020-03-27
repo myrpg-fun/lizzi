@@ -43,6 +43,20 @@ data.count += 10;
 ### Class: zzDataRef
 
 ### Class: Collection
+#### Collection Events
+`add`, `remove` emit on add/remove every element in collection.
+* `element` is added/removed element
+* `index` is index
+* `target` is this instance
+
+`add-values`, `replace-values`, `remove-values` emit on add/replace/remove variables in collection.
+* `values` is added/replaced/removed array of elements
+* `target` is this instance
+
+#### Collection Variables
+`Collection.collection` get collection as **Array**.
+
+`Collection.length` get size of collection.
 
 ## Events
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
