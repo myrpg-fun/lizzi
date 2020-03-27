@@ -23,7 +23,7 @@ _This class inherits from the [Event](#class-event) class._
 const data = new Data;
 
 data.set({
-    count: 0
+    count: 10
 });
 
 data.on('set:count', function(ev){
@@ -32,7 +32,7 @@ data.on('set:count', function(ev){
 
 data.count = 99;
 // Prints: 
-// count: 0 99
+// count: 10 99
 ```
 
 ### Class: zzDataRef
