@@ -46,14 +46,28 @@ myEmitter.emit('event', 'x', 'y');
 
 ### Class: Event
 #### Adding events
-`Event.on(_name_, _listener_[, _self_]);` adds the _listener_ function to the end of the listeners for the event named by _name_:
+`Event.on(_name_ or _[...array of names]_, _listener_[, _self_]);` adds the _listener_ function to the end of the listeners for the event named _name_:
 * `name` is string name of event
 * `listener` is function callback
 * `self` is this parameter to the callback function
 * Returns: \<EventListener> is listener instance
 
+`Event.once(_name_ or _[...array of names]_, _listener_[, _self_]);`  adds **one-time** _listener_ function for the event named _name_. The next time eventName is triggered, this listener is removed and then invoked.
+
+`Event.prependListener(_name_ or _[...array of names]_, _listener_[, _self_]);` adds the _listener_ function to the _begining_ of the listeners for the event named by _name_.
+
+`Event.prependOnceListener(_name_ or _[...array of names]_, _listener_[, _self_]);` adds **one-time** _listener_ function to the _begining_ of the listeners for the event named by _name_.
+
 #### Removing events
 `Event.off(eventListener);` removes current _eventListener_ from class.
 
-`Event.off([name][, listener][, self]);` find and remove all specified event listeners from class by eventListener or name or function or by self.
+`Event.off(_name_ or _[...array of names]_[, listener][, self]);` find and remove all `name` event listeners from class filtered by `function` or by `self`.
 
+`Event.off([listener][, self]);` find and remove all specified event listeners from class by `function` or by `self`.
+
+#### Emitting event
+
+
+### Class: EventListener
+#### Remove this listener
+`EventListener.off();` removes current _eventListener_ from class.
