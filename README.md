@@ -45,7 +45,7 @@ myEmitter.emit('event', 'x', 'y');
 ```
 
 ### Class: Event
-\<EventListener> **Event.on**(\<string> name, \<function> listener[, \<object> self]);
+#### _\<EventListener>_ Event.on(\<string> _name_, \<function> _listener_[, \<object> _self_]);
   
 Adds the _listener_ function to the end of the listeners for the event named by _name_.
 
