@@ -1,5 +1,20 @@
 # lizzi
-Node and Javascript lizzi (react) framework
+Node and Javascript lizzi (react) framework.
+
+## React Data
+
+### Class: Data
+#### Add values to listener
+`Data.set({
+    name: value,
+    ...
+});` set variables to emit `set` event on any value changes.
+
+
+
+### Class: zzDataRef
+
+### Class: Collection
 
 ## Events
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
