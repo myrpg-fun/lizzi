@@ -32,12 +32,12 @@ class MyData extends Data{
 const data = new MyData;
 
 data.on('set:count', function(ev){
-    console.log('count:', ev.value);
+    console.log('count:', ev.last, ev.value);
 });
 
-data.count++;
+data.count += 10;
 // Prints: 
-// count: 1
+// count: 0 10
 ```
 
 ### Class: zzDataRef
