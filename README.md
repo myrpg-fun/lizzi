@@ -4,6 +4,7 @@ Node and Javascript lizzi (reactive) framework.
 ## Reactive Data
 
 ### Class: Data
+This class inherits from the **Event** class.
 #### Data Events
 `set`, `set:name`, `set-values` emit on change value of variables.
 * `name` is name of variable
