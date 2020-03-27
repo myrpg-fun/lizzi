@@ -5,7 +5,7 @@ Node and Javascript lizzi (react) framework.
 
 ### Class: Data
 #### Data Events
-`set`, `set:name`, `set-values` emit on change value of variable.
+`set`, `set:name`, `set-values` emit on change value of variables.
 * `name` is name of variable
 * `value` is current value
 * `last` is old value
