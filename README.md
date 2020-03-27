@@ -20,25 +20,19 @@ _This class inherits from the [Event](#class-event) class._
 `Data.ref(name);` get [zzDataRef](#class-zzdataref) of `name`.
 
 ```javascript
-class MyData extends Data{
-    constructor(){
-        super();
-    
-        this.set({
-            count: 0
-        });
-    }
-}
+const data = new Data;
 
-const data = new MyData;
+data.set({
+    count: 0
+});
 
 data.on('set:count', function(ev){
     console.log('count:', ev.last, ev.value);
 });
 
-data.count += 10;
+data.count = 99;
 // Prints: 
-// count: 0 10
+// count: 0 99
 ```
 
 ### Class: zzDataRef
