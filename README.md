@@ -1,5 +1,5 @@
 # lizzi
-Node and Javascript lizzi (react) framework.
+Node and Javascript lizzi (reactive) framework.
 
 ## Reactive Data
 
