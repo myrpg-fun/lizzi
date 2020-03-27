@@ -17,7 +17,7 @@ This class inherits from the [Event](#class-event) class.
 #### Add values to listener
 `Data.set({ name: value, ... });` add variables to emit `set` event on any value changes.
 
-`Data.ref(name);` get **zzDataRef** of `name`.
+`Data.ref(name);` get [zzDataRef](#class-zzdataref) of `name`.
 
 ```javascript
 class MyData extends Data{
@@ -60,11 +60,11 @@ data.count += 10;
 `Collection.length` get size of collection.
 
 ### Class: CollectionFilter
-Collection filter used for sort and filter elements in Collections.
-#### In and out collections
-`new CollectionFilter(collection)` set inner `collection`.
+CollectionFilter used for sort and filter elements in [Collections](#class-collection).
+#### Set in and out collections
+`new CollectionFilter(collection)` set inner `collection` for filter/sort.
 
-`CollectionFilter.setFilterFn(function)` filter/sort function.
+`CollectionFilter.setFilterFn(function)` filter/sort function. Get array of elements from inner `collection` and return new elements for outer array.
 
 `CollectionFilter.to(collection)` add to filter outer `collection` to replace filtered array.
 
@@ -99,9 +99,9 @@ console.log(viewElements.collection);
 ## Events
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
-> For instance: a **Data** object emits an event each time when data value is changed; a **Collection** emits an event when data added to collection; removed from etc.
+> For instance: a [Data](class-data) object emits an event each time when data value is changed; a [Collections](#class-collection) emits an event when data added to collection; removed from etc.
 
-All objects that emit events are instances of the Event class.
+All objects that emit events are instances of the [Event](#class-event) class.
 
 When the Event object emits an event, all of the functions attached to that specific event are called synchronously.
 
@@ -145,7 +145,7 @@ myEmitter.emit('event', 'x', 'y');
 * `name` is string name of event
 * `listener` is function callback
 * `self` is this parameter to the callback function
-* Returns: \<EventListener> is listener instance
+* Returns: [EventListener](#class-eventlistener)
 
 `Event.once(name or ...array, listener[, self]);`  adds **one-time** _listener_ function for the event named _name_. The next time eventName is triggered, this listener is removed and then invoked.
 
