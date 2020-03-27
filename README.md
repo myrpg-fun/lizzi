@@ -58,14 +58,14 @@ data.count += 10;
 
 `Collection.length` get size of collection.
 
-### Class: CFilter
+### Class: CollectionFilter
 Collection filter used for sort and filter elements in Collections.
 #### In and out collections
-`new CFilter(collection)` set inner `collection`.
+`new CollectionFilter(collection)` set inner `collection`.
 
-`CFilter.setFilterFn(function)` filter/sort function.
+`CollectionFilter.setFilterFn(function)` filter/sort function.
 
-`CFilter.to(collection)` add to filter outer `collection` to replace filtered array.
+`CollectionFilter.to(collection)` add to filter outer `collection` to replace filtered array.
 
 ```javascript
 let data = new Data;
@@ -74,7 +74,7 @@ data.set({count: 0});
 let mainElements = new Collection;
 let viewElements = new Collection;
 
-let filter = new CFilter(mainElements)
+let filter = new CollectionFilter(mainElements)
     .setFilterFn((elements) => elements.filter(el => el.count <= data.count))
     .to(viewElements);
     
