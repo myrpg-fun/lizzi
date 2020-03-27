@@ -4,13 +4,41 @@ Node and Javascript lizzi (react) framework.
 ## React Data
 
 ### Class: Data
+#### Data Events
+`set`, `set:name`, `set-values` emit on change value of variable.
+* `name` is name of variable
+* `value` is current value
+* `last` is old value
+* `target` is this instance
+
+`remove-values` emit on remove variable.
+
 #### Add values to listener
-`Data.set({
-    name: value,
-    ...
-});` set variables to emit `set` event on any value changes.
+`Data.set({ name: value, ... });` add variables to emit `set` event on any value changes.
 
+`Data.ref(name);` get **zzDataRef** of `name`.
 
+```javascript
+class MyData extends Data{
+    constructor(){
+        super();
+    
+        this.set({
+            count: 0
+        });
+    }
+}
+
+const data = new MyData;
+
+data.on('set:count', function(ev){
+    console.log('count:', ev.value);
+});
+
+data.count++;
+// Prints: 
+// count: 1
+```
 
 ### Class: zzDataRef
 
