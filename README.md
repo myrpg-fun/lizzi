@@ -45,12 +45,15 @@ myEmitter.emit('event', 'x', 'y');
 ```
 
 ### Class: Event
-#### _\<EventListener>_ Event.on(\<string> _name_, \<function> _listener_[, \<object> _self_]);
-  
+#### Event.on
+_\<EventListener>_ Event.on(\<string> _name_, \<function> _listener_[, \<object> _self_]);
+
 Adds the _listener_ function to the end of the listeners for the event named by _name_.
 
-#### Event.off(\<EventListener> listener);
-#### Event.off([\<string> name][, \<function> listener][, \<object> self]);
+#### Event.off
+Event.off(\<EventListener> listener);
+
+Event.off([\<string> name][, \<function> listener][, \<object> self]);
 
 Remove all specified event listeners from class by eventListener or name or function or by self.
 
