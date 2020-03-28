@@ -132,15 +132,6 @@ _This class inherits from the [Event](#class-event) class._
 
 `Collection.replace(elements);` replace all elements in collection and emit `replace-values` event.
 
-```javascript
-let elements = new Collection;
-
-elements.add([{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]);
-console.log(elements.collection);
-//Prints:
-//[{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]
-```
-
 `add`, `remove` emit on add/remove every element in collection.
 * `element` is added/removed element
 * `index` is index
@@ -151,12 +142,20 @@ let elements = new Collection;
 
 elements.on('add', (ev) => console.log('add', ev.element));
 
-mainElements.add([{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]);
+mainElements.add([
+    {user: 1, name: 'user 1'}, 
+    {user: 2, name: 'user 2'}
+]);
+mainElements.add( {user: 3, name: 'user 3'} );
 
 //Prints:
 //add {user: 1, name: 'user 1'}
 //add {user: 2, name: 'user 2'}
 //add {user: 3, name: 'user 3'}
+
+console.log(elements.collection);
+//Prints:
+//[{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]
 ```
 
 `add-values`, `remove-values`, `replace-values` emit on add/replace/remove variables in collection.
