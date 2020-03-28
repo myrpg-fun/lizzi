@@ -44,7 +44,7 @@ data.on('set:progress', function(ev){
 
 data.progress = 99;
 // Prints: 
-// progress: 0% -> 99%
+// progress: 10% -> 99%
 ```
 
 Event `set-values` emit one time after script ends.
