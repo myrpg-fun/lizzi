@@ -1,7 +1,7 @@
 {
     "name": "lizzi",
     "version": "0.0.1",
-    "description": "Node and Javascript lizzi (react) framework library",
+    "description": "Node and Javascript lizzi (reactive) library",
     "main": "lib/lizzi",
     "scripts": {
         "build": "npm install && gulp",
