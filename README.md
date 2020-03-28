@@ -157,7 +157,7 @@ console.log(elements.collection);
 //[{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]
 ```
 
-`add-values`, `remove-values`, `replace-values` emit on add/replace/remove variables in collection.
+`add-values`, `remove-values`, `replace-values` emit after add/replace/remove all variables in collection.
 * `values` is added/replaced/removed array of elements
 * `target` is this instance
 
