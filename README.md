@@ -40,6 +40,8 @@ data.progress = 99;
 // progress: 0% -> 99%
 ```
 
+Event `set-values` emit one time after script ends.
+
 ```javascript
 class userSettings extends Data{
     connectToDB(db){
