@@ -53,7 +53,7 @@ Event `set-values` emit one time after script ends.
 
 ```javascript
 class userSettings extends Data{
-    connectToDB(db){
+    saveToDB(db){
         this.on('set-values', function(ev){
             console.log('lazy save values one time', this.values());
             console.log('changed only', ev.values);
@@ -73,7 +73,7 @@ class userSettings extends Data{
 }
 
 const settings = new userSettings;
-settings.connectToDB(db);
+settings.saveToDB(db);
 
 this.uploadSpeed = 5;
 this.uploadSpeed = 1000;
