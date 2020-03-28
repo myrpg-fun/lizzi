@@ -55,6 +55,8 @@ class userSettings extends Data{
             downloadSpeed: 0,
             allowDownload: false
         });
+        
+        this.notReactiveValue = 'some letters';
     }
 }
 
