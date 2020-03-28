@@ -34,7 +34,7 @@ class Example extends Data{
         
         this.set({
             header: 'Example',
-            text: 'This is zzField example',
+            description: 'This is zzField example',
             name: 'Lizzi'
         })
     }
