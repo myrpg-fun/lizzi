@@ -1,27 +1,45 @@
 {
-  "name": "lizzi framework",
-  "version": "0.1.0",
-  "description": "Node and Javascript lizzi (react) framework library",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/myrpg-fun/lizzi.git"
-  },
-  "keywords": [
-    "lizzi",
-    "react",
-    "framework",
-    "node.js",
-    "node",
-    "javascript"
-  ],
-  "author": "Stanislav Shishankin",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/myrpg-fun/lizzi/issues"
-  },
-  "homepage": "https://github.com/myrpg-fun/lizzi#readme"
+    "name": "lizzi",
+    "version": "0.0.1",
+    "description": "Node and Javascript lizzi (react) framework library",
+    "main": "lib/lizzi",
+    "scripts": {
+        "build": "npm install && gulp",
+        "start": "gulp watch",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/myrpg-fun/lizzi.git"
+    },
+    "keywords": [
+        "lizzi",
+        "react",
+        "framework",
+        "node.js",
+        "node",
+        "javascript"
+    ],
+    "author": "Stanislav Shishankin",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/myrpg-fun/lizzi/issues"
+    },
+    "homepage": "https://github.com/myrpg-fun/lizzi#readme",
+    "devDependencies": {
+        "@babel/core": "^7.9.0",
+        "@babel/plugin-transform-runtime": "^7.9.0",
+        "@babel/preset-env": "^7.9.0",
+        "@babel/runtime": "^7.9.2",
+        "babelify": "^10.0.0",
+        "browserify": "^16.5.0",
+        "event-stream": "^4.0.1",
+        "glob": "^7.1.6",
+        "gulp": "^4.0.2",
+        "gulp-babel": "^8.0.0",
+        "regenerator-runtime": "^0.13.5",
+        "vinyl-buffer": "^1.0.1",
+        "vinyl-source-stream": "^2.0.0"
+    },
+    "dependencies": {}
 }
