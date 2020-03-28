@@ -167,7 +167,7 @@ console.log(elements.collection);
 
 ### Class: CollectionFilter
 CollectionFilter used for sort and filter elements in [Collections](#class-collection).
-#### Set in and out collections
+
 `new CollectionFilter(collection)` set inner `collection` for filter/sort.
 
 `CollectionFilter.setFilterFn(function)` filter/sort function. Get array of elements from inner `collection` and return new elements for outer array.
