@@ -1,7 +1,49 @@
 # lizzi
 Node and Javascript lizzi (reactive) library.
 
-## Reactive
+## Template Engine
+
+### Class: zzField
+Add relative logic to DOM HTML.
+
+```html
+<div id="template">
+    <h1 class="header">Header</h1>
+    <p class="text">Paragraph</p>
+    <input class="name" type="text" />
+    <button class="submit">Submit</button>
+</div>
+```
+
+```javascript
+class extends Data{
+    createField(){
+        return new zzField("#template", this)
+            .input('.name', this.ref("name"))
+            .text('.header', this.ref("header"))
+            .text('.text', this.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", this.name);
+            })
+    }
+    
+    constructor(){
+        super();
+        
+        this.set({
+            header: 'Example',
+            text: 'This is zzField example',
+            name: 'Lizzi'
+        })
+    }
+}
+```
+
+
+### Class: zzTemplate
+
+
+## Reactive Engine
 
 ### Class: Data
 _This class inherits from the [Event](#class-event) class._
@@ -202,7 +244,7 @@ console.log(viewElements.collection);
 //[{count: 0}, {count: 10}, {count: 5}]
 ```
 
-## Events
+## Events Engine
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
 > For instance: a [Data](class-data) object emits an event each time when data value is changed; a [Collections](#class-collection) emits an event when data added to collection; removed from etc.
