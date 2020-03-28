@@ -12,7 +12,7 @@ Events `set`, `set:name`, `set-values` emit on change any registered variable.
 * `name` is name of variable
 * `value` is current value
 * `last` is old value
-* `target` is this instance
+* `target` is Data instance
 
 ```javascript
 const data = new Data;
@@ -75,11 +75,42 @@ this.downloadSpeed = 10;
 // lazy save values one time {uploadSpeed: 1000, downloadSpeed: 10, allowDownload: false}
 ```
 
-`Data.set({ name: value, ... });` add variables to emit `set` event on any value changes.
+`Data.unset(name);` unregister and remove variable. Emit `remove-value`:
+* `name` is name of variable
+* `value` is last value of variable
+* `target` is Data instance
 
-`Data.ref(name);` get [zzDataRef](#class-zzdataref) of `name`.
+`Data.ref(name);` get [zzDataRef](#class-zzdataref) by `name`.
 
 ### Class: zzDataRef
+Shortcut reference to variable from [Data](#class-data) object. Used for set variable change listeners and get values from current variable from other classes.
+
+`zzDataRef.onSet(listener[, self])` add event listener on change current variable.
+
+`zzDataRef.value` is current value of variable.
+
+```javascript
+    // ...
+    const modelRel = user.rel('name');
+    const inputEl = document.getElementById('input-name');
+
+    //syncing input.value with user.name value
+    modelRel.onSet( function(event){
+        if (inputEl.value !== event.value){
+            inputEl.value = event.value;
+        }
+    });
+
+    inputEl.addEventListener('input', function(){
+        if (inputEl.value !== modelRel.value){
+            modelRel.value = inputEl.value;
+        }
+    }, false);
+
+    el.value = this.modelRel.value;
+```
+
+`zzDataRef.off([listener][, self])` is remove event listener on change variable.
 
 ### Class: Collection
 _This class inherits from the [Event](#class-event) class._
