@@ -147,7 +147,6 @@ mainElements.add([
     {user: 2, name: 'user 2'}
 ]);
 mainElements.add( {user: 3, name: 'user 3'} );
-
 //Prints:
 //add {user: 1, name: 'user 1'}
 //add {user: 2, name: 'user 2'}
