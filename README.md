@@ -47,8 +47,9 @@ Event `set-values` emit one time after script ends.
 ```javascript
 class userSettings extends Data{
     connectToDB(db){
-        this.on('set-values', function(){
+        this.on('set-values', function(ev){
             console.log('lazy save values one time', this.values());
+            console.log('changed only', ev.values);
             db.update(this.values());
         })
     }
@@ -75,6 +76,7 @@ this.downloadSpeed = 10;
 
 // Prints: 
 // lazy save values one time {uploadSpeed: 1000, downloadSpeed: 10, allowDownload: false}
+// changed only {uploadSpeed: 1000, downloadSpeed: 10}
 ```
 
 `Data.unset(name);` unregister and remove variable. Emit `remove-value`:
