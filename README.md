@@ -8,7 +8,7 @@ _This class inherits from the [Event](#class-event) class._
 
 `Data.set({ ... });` register reactive variable and set values.
 
-Events `'set'`, `'set:name'` emit on change any registered variable.
+Events `set`, `set:name` emit on change any registered variable.
 * `name` is name of variable
 * `value` is current value
 * `last` is old value
