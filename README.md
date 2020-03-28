@@ -25,10 +25,17 @@ data.set({
     status: 'downloading',
     progress: 0
 });
-
 // Prints: 
 // status: undefined downloading
 // progress: undefined 0
+
+data.set({
+    progress: 10,
+    status: 'uploading'
+});
+// Prints: 
+// progress: 0 10
+// status: downloading uploading
 
 data.off('set');
 data.on('set:progress', function(ev){
