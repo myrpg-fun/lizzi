@@ -7,12 +7,12 @@ Node and Javascript lizzi (reactive) library.
 Add reactive logic to DOM HTML.
 
 ```html
-<script id="template" type="text/html">
+<div id="template">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
     <input class="name" type="text" />
     <button class="submit">Submit</button>
-</script>
+</div>
 ```
 
 ```javascript
