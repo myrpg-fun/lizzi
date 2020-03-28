@@ -7,6 +7,7 @@ Node and Javascript lizzi (reactive) library.
 Add reactive logic to DOM HTML.
 
 ```html
+<!-- HTML template -->
 <div id="template">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
@@ -39,7 +40,8 @@ class Example extends Data{
 }
 
 const input = new Example;
-input.createField();
+const field = input.createField();
+field.appendTo('body');
 
 ```
 
