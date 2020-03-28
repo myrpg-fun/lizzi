@@ -5,7 +5,39 @@ Node and Javascript lizzi (reactive) framework.
 
 ### Class: Data
 _This class inherits from the [Event](#class-event) class._
-#### Data Events
+
+```javascript
+const data = new Data;
+
+data.on('set', function(ev){
+    console.log(ev.name, ':', ev.last, ev.value);
+});
+
+data.set({
+    status: 'downloading',
+    progress: 0
+});
+
+// Prints: 
+// status: undefined downloading
+// progress: undefined 0
+
+data.off('set');
+data.on('set:progress', function(ev){
+    console.log('progress:', ev.value+'%');
+});
+
+data.progress = 99;
+// Prints: 
+// progress: 99%
+
+data.on('set-values', function(ev){
+    // ...
+    db.update(data);
+});
+
+```
+
 `set`, `set:name`, `set-values` emit on change value of variables.
 * `name` is name of variable
 * `value` is current value
@@ -14,26 +46,9 @@ _This class inherits from the [Event](#class-event) class._
 
 `remove-values` emit on remove variable.
 
-#### Add values to listener
 `Data.set({ name: value, ... });` add variables to emit `set` event on any value changes.
 
 `Data.ref(name);` get [zzDataRef](#class-zzdataref) of `name`.
-
-```javascript
-const data = new Data;
-
-data.set({
-    count: 10
-});
-
-data.on('set:count', function(ev){
-    console.log('count:', ev.last, ev.value);
-});
-
-data.count = 99;
-// Prints: 
-// count: 10 99
-```
 
 ### Class: zzDataRef
 
