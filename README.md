@@ -94,7 +94,7 @@ this.downloadSpeed = 10;
 `Data.ref(name);` get [zzDataRef](#class-zzdataref) by `name`.
 
 ### Class: zzDataRef
-Shortcut reference to variable from [Data](#class-data) object. Used for set variable change listeners and get values from current variable from other classes.
+Shortcut reference to variable from [Data](#class-data) object. Used for set variable `set` event listener and get current variable value.
 
 `zzDataRef.onSet(listener[, self])` add event listener on change current variable.
 
