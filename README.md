@@ -90,11 +90,10 @@ Shortcut reference to variable from [Data](#class-data) object. Used for set var
 `zzDataRef.value` is current value of variable.
 
 ```javascript
-    // ...
+    //syncing input.value with user.name value
     const modelRel = user.rel('name');
     const inputEl = document.getElementById('input-name');
 
-    //syncing input.value with user.name value
     modelRel.onSet( function(event){
         if (inputEl.value !== event.value){
             inputEl.value = event.value;
@@ -107,7 +106,8 @@ Shortcut reference to variable from [Data](#class-data) object. Used for set var
         }
     }, false);
 
-    el.value = this.modelRel.value;
+    //set current model value as default
+    inputEl.value = modelRel.value;
 ```
 
 `zzDataRef.off([listener][, self])` is remove event listener on change variable.
