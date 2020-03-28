@@ -7,16 +7,16 @@ Node and Javascript lizzi (reactive) library.
 Add reactive logic to DOM HTML.
 
 ```html
-<div id="template">
+<script id="template" type="text/html">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
     <input class="name" type="text" />
     <button class="submit">Submit</button>
-</div>
+</script>
 ```
 
 ```javascript
-class extends Data{
+class Example extends Data{
     createField(){
         return new zzField("#template", this)
             .input('.name', this.ref("name"))
@@ -37,6 +37,10 @@ class extends Data{
         })
     }
 }
+
+const input = new Example;
+input.createField();
+
 ```
 
 ### Class: zzTemplate
