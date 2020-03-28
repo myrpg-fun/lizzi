@@ -40,8 +40,7 @@ class Example extends Data{
     }
 }
 
-const input = new Example;
-const field = input.createFieldDOM();
+const field = new Example().createFieldDOM();
 field.appendTo('body');
 
 ```
