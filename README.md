@@ -4,7 +4,7 @@ Node and Javascript lizzi (reactive) library.
 ## Template Engine
 
 ### Class: zzField
-Add relative logic to DOM HTML.
+Add reactive logic to DOM HTML.
 
 ```html
 <div id="template">
@@ -39,9 +39,7 @@ class extends Data{
 }
 ```
 
-
 ### Class: zzTemplate
-
 
 ## Reactive Engine
 
