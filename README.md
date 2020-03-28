@@ -6,6 +6,14 @@ Node and Javascript lizzi (reactive) framework.
 ### Class: Data
 _This class inherits from the [Event](#class-event) class._
 
+`Data.set({ ... });` register reactive variable and set values.
+
+Events `set`, `set:name`, `set-values` emit on change any registered variable.
+* `name` is name of variable
+* `value` is current value
+* `last` is old value
+* `target` is this instance
+
 ```javascript
 const data = new Data;
 
@@ -24,27 +32,44 @@ data.set({
 
 data.off('set');
 data.on('set:progress', function(ev){
-    console.log('progress:', ev.value+'%');
+    console.log('progress:', ev.last+'%', '->', ev.value+'%');
 });
 
 data.progress = 99;
 // Prints: 
-// progress: 99%
-
-data.on('set-values', function(ev){
-    // ...
-    db.update(data);
-});
-
+// progress: 0% -> 99%
 ```
 
-`set`, `set:name`, `set-values` emit on change value of variables.
-* `name` is name of variable
-* `value` is current value
-* `last` is old value
-* `target` is this instance
+```javascript
+class userSettings extends Data{
+    connectToDB(db){
+        this.on('set-values', function(){
+            console.log('lazy save values one time', this.values());
+            db.update(this.values());
+        })
+    }
 
-`remove-values` emit on remove variable.
+    constructor(){
+        this.set({
+            uploadSpeed: 0,
+            downloadSpeed: 0,
+            allowDownload: false
+        });
+    }
+}
+
+const settings = new userSettings;
+settings.connectToDB(db);
+
+this.uploadSpeed = 5;
+this.uploadSpeed = 1000;
+this.downloadSpeed = 0;
+this.downloadSpeed = 9999;
+this.downloadSpeed = 10;
+
+// Prints: 
+// lazy save values one time {uploadSpeed: 1000, downloadSpeed: 10, allowDownload: false}
+```
 
 `Data.set({ name: value, ... });` add variables to emit `set` event on any value changes.
 
