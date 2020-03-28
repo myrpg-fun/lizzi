@@ -161,7 +161,6 @@ console.log(elements.collection);
 * `values` is added/replaced/removed array of elements
 * `target` is this instance
 
-#### Collection Variables
 `Collection.collection` get collection elements as **Array**.
 
 `Collection.length` get size of collection.
