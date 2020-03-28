@@ -125,7 +125,31 @@ Shortcut reference to variable from [Data](#class-data) object. Used for set var
 
 ### Class: Collection
 _This class inherits from the [Event](#class-event) class._
-#### Collection Events
+
+```javascript
+let elements = new Collection;
+
+let data1 = {user: 1, name: 'user 1'};
+let data2 = {user: 2, name: 'user 2'};
+let data3 = {user: 3, name: 'user 3'};
+let data4 = {user: 4, name: 'user 4'};
+
+elements.add([ data1, data2, data3 ]);
+console.log(elements.collection);
+//Prints:
+//[{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]
+
+elements.remove(data2);
+elements.add(data4);
+console.log(elements.collection);
+//Prints:
+//[{user: 1, name: 'user 1'}, {user: 3, name: 'user 3'}, {user: 4, name: 'user 4'}]
+
+elements.replace([ data2 ]);
+//Prints:
+//[{user: 2, name: 'user 2'}]
+```
+
 `add`, `remove` emit on add/remove every element in collection.
 * `element` is added/removed element
 * `index` is index
