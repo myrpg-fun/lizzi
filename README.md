@@ -24,7 +24,7 @@ Add reactive logic to DOM HTML.
 
 ```javascript
 class Example extends Data{
-    createFieldDOM(){
+    createField(){
         return new zzField("#template", this)
             .input('.input-header', this.ref("header"))
             .input('.input-description', this.ref("description"))
@@ -45,8 +45,14 @@ class Example extends Data{
     }
 }
 
-const field = new Example().createFieldDOM();
-field.appendTo('body');
+const editor = new Example();
+//create DOM field
+const field1 = editor.createField();
+field1.appendTo('body');
+
+//create second DOM field synced with editor object
+const field2 = editor.createField();
+field2.appendTo('body');
 
 ```
 
