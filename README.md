@@ -25,11 +25,12 @@ Add reactive logic to DOM HTML.
 ```javascript
 class Example extends Data{
     createField(){
+        //created new DOM tree, using template. And then bind links to Data object
         return new zzField("#template", this)
-            .input('.input-header', this.ref("header"))
-            .input('.input-description', this.ref("description"))
-            .text('.header', this.ref("header"))
-            .text('.text', this.ref("description"))
+            .linkInput('.input-header', this.ref("header"))
+            .linkInput('.input-description', this.ref("description"))
+            .linkText('.header', this.ref("header"))
+            .linkText('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name, this.description);
             });
