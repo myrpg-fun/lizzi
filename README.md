@@ -19,14 +19,13 @@ Add reactive logic to DOM HTML.
 ```javascript
 class Example extends Data{
     createFieldDOM(){
-        return new zzField(new zzTemplate("#template"), this)
+        return new zzField("#template", this)
             .input('.name', this.ref("name"))
             .text('.header', this.ref("header"))
             .text('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name);
-            })
-            .createFieldDOM();
+            });
     }
     
     constructor(){
