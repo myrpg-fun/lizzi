@@ -169,8 +169,6 @@ class FilteredPostCollection extends Collection{
     }
     
     createCollectionField(){
-        const isEmpty = this.isEmpty();
-    
         return new zzField("#template-collection", this)
             .dataCollection('.collection', this, 'createField');
     }
