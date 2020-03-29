@@ -11,8 +11,8 @@ Add reactive logic to DOM HTML.
 <div id="template">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
-    <input class="name" type="text" />
-    <textarea class="description"></textarea>
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
     <button class="submit">Submit</button>
 </div>
 ```
@@ -21,8 +21,8 @@ Add reactive logic to DOM HTML.
 class Example extends Data{
     createFieldDOM(){
         return new zzField("#template", this)
-            .input('.name', this.ref("header"))
-            .input('.description', this.ref("description"))
+            .input('.input-header', this.ref("header"))
+            .input('.input-description', this.ref("description"))
             .text('.header', this.ref("header"))
             .text('.text', this.ref("description"))
             .click('.button', function(){
