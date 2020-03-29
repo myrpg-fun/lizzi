@@ -151,10 +151,23 @@ class PostCollection extends Collection{
 const posts = new PostCollection;
 posts.createField().appendTo('body');
 ```
-Adding search filter:
+Search filter example:
+```html
+<!-- add search input HTML templates -->
+<div id="template-search">
+    <div>
+        Search: <input class="input-search" type="text" />
+    </div>
+</div>
+```
 
 ```javascript
 class FilteredPostCollection extends Collection{
+    this.createSearchField(){
+        return new zzField("#template-newpost", this)
+            .inputLink('.input-search', this.search.ref("find"));
+    }
+    
     createCollectionField(){
         return new zzField("#template-collection", this)
             .dataCollection('.collection', this, 'createField');
@@ -163,6 +176,8 @@ class FilteredPostCollection extends Collection{
     createField(){
         return new zzField("#template-collection", this)
             .fieldsCollection('.collection', new Collection([
+                //search field
+                this.createSearchField(),
                 //add editor from posts
                 this.posts.createEditorField(),
                 //but out posts from filtered collection
@@ -170,11 +185,28 @@ class FilteredPostCollection extends Collection{
             ]));
     }
     
+    // filter used in FilterCollection class
+    filter(posts){
+        //first filter empty posts
+        posts = posts.filter(p => p.name !== '' && p.description !== '');
+        
+        //second filter by search
+        if (this.search.find !== ''){
+            posts = posts.filter(p => p.name.indexOf(this.search.find) !== -1 || p.description.indexOf(this.search.find) !== -1);
+        }
+        
+        return posts;
+    }
+    
     constructor(posts){
         super();
         
         this.posts = posts;
+        this.search = new Data({
+            find: ''
+        })
         
+        //create filter proxy
         new FilterCollection(posts)
             .setFilterFn(this.filter.bind(this)
             .to(this);
