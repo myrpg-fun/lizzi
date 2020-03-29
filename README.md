@@ -9,7 +9,7 @@ Node and Javascript lizzi (reactive) library.
 ## Template Engine
 
 ### Class: zzField
-Add reactive logic to DOM HTML.
+Clone HTML DOM from template and add reactive logic.
 
 ```html
 <!-- Editor HTML template -->
