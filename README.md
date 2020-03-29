@@ -75,6 +75,25 @@ const fieldView = new zzField("#template-viewer", editor)
 fieldView.appendTo('body');
 ```
 
+```html
+<!-- add new HTML template -->
+<div id="template-collection">
+    <div class="collection"></div>
+</div>
+```
+
+```javascript
+//create collection
+const collect = new Collection;
+
+const fieldCollection = new zzField("#template-collection")
+    .dataCollection('.collection', collect, 'createField');
+
+fieldCollection.appendTo('body');
+
+collect.add(editor);
+```
+
 ### Class: zzTemplate
 
 ## Reactive Engine
