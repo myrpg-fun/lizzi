@@ -105,12 +105,12 @@ class Post extends Data{
             });
     }
     
-    constructor(){
+    constructor(post){
         super();
         
         this.set({
-            header: 'Example',
-            description: 'This is zzField example'
+            header: post.header || '',
+            description: post.description || ''
         })
     }
 }
