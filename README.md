@@ -117,7 +117,10 @@ class Post extends Data{
 
 class PostCollection extends Collection{
     createEditorField(){
-        const newPost = new Post();
+        const newPost = new Data({
+            header: '',
+            description: ''
+        });
     
         return new zzField("#template-newpost", this)
             .inputLink('.input-header', newPost.ref("header"))
