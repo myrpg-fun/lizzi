@@ -214,6 +214,7 @@ class FilteredPostCollection extends Collection{
             .setFilterFn(this.filter.bind(this)
             .to(this);
             
+        //refreshing filtered data on any changes search filter variable
         this.search.on('set:find', () => filter.refresh());
     }
 }
