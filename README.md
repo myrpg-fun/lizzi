@@ -57,7 +57,7 @@ field2.appendTo('body');
 ```
 
 ```html
-<!-- HTML template -->
+<!-- add new HTML template -->
 <div id="template-viewer">
     <div class="view">
         <h1 class="header">Header</h1>
@@ -71,6 +71,7 @@ field2.appendTo('body');
 const fieldView = new zzField("#template-viewer", editor)
     .linkText('.header', editor.ref("header"))
     .linkText('.text', editor.ref("description"));
+
 fieldView.appendTo('body');
 ```
 
