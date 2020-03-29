@@ -153,7 +153,7 @@ posts.createField().appendTo('body');
 ```
 #### Search filter example
 ```html
-<!-- add search input HTML templates -->
+<!-- add search input HTML template -->
 <div id="template-search">
     <div>
         Search: <input class="input-search" type="text" />
@@ -169,6 +169,8 @@ class FilteredPostCollection extends Collection{
     }
     
     createCollectionField(){
+        const isEmpty = this.isEmpty();
+    
         return new zzField("#template-collection", this)
             .dataCollection('.collection', this, 'createField');
     }
@@ -220,6 +222,56 @@ class FilteredPostCollection extends Collection{
 }
 
 const filteredPosts = new FilteredPostCollection(posts);
+filteredPosts.createField().appendTo('body');
+```
+#### Check Collection is Empty
+```html
+<!-- add empty labels HTML templates -->
+<div id="template-on-empty">No posts</div>
+<div id="template-on-empty-search">Finded no posts</div>
+```
+```javascript
+class FilteredEmptyPostCollection extends FilteredPostCollection{
+    isEmpty(){
+        //show empty field, if results is empty
+        const isEmpty = new Data({
+            emptyField: null
+        });
+        
+        const check = function (){
+            if (this.length === 0){
+                //if we have 0 results, check posts count
+                if (this.posts.length === 0){
+                    //if 0, then no posts
+                    isEmpty.emptyField = new zzField("#template-on-empty", this);
+                }else{
+                    //if >0, then search results is empty
+                    isEmpty.emptyField = new zzField("#template-on-empty-search", this);
+                }
+            }else{
+                //remove field if not empty
+                isEmpty.emptyField = null;
+            }
+        }.bind(this);
+        
+        this.on('set:length', check, this);
+        
+        //init current value
+        check();
+        
+        return isEmpty;
+    }
+    
+    createCollectionField(){
+        const isEmpty = this.isEmpty();
+    
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField')
+            .field('.collection', isEmpty.ref('emptyField'));
+    }
+}
+
+const filteredPosts = new FilteredEmptyPostCollection(posts);
 filteredPosts.createField().appendTo('body');
 ```
 
