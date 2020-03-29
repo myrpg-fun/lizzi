@@ -1,4 +1,4 @@
-# lizzi
+# Lizzi
 Node and Javascript lizzi (reactive) library.
 
 ### Why Lizzi library?
