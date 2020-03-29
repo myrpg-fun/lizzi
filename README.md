@@ -127,7 +127,7 @@ class PostCollection extends Collection{
             .inputLink('.input-description', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", newPost.name, newPost.description);
-                this.add( new Post( newPost.values ) );
+                this.add( new Post( newPost.values() ) );
             });
     }
     
