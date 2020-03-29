@@ -117,14 +117,11 @@ class Post extends Data{
 
 class PostCollection extends Collection{
     createEditorField(){
-        const newPost = new Data({
-            'header': '',
-            'description': ''
-        });
+        const newPost = new Post();
     
         return new zzField("#template-newpost", this)
-            .inputLink('.input-header', this.ref("header"))
-            .inputLink('.input-description', this.ref("description"))
+            .inputLink('.input-header', newPost.ref("header"))
+            .inputLink('.input-description', newPost.ref("description"))
             .click('.button', function(){
                 console.log("submit:", newPost.name, newPost.description);
                 this.add( new Post( newPost.values() ) );
