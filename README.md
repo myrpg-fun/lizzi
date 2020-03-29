@@ -27,10 +27,10 @@ class Example extends Data{
     createField(){
         //created new DOM tree, using template. And then bind links from Data object
         return new zzField("#template-editor", this)
-            .linkInputValue('.input-header', this.ref("header"))
-            .linkInputValue('.input-description', this.ref("description"))
-            .linkTextValue('.header', this.ref("header"))
-            .linkTextValue('.text', this.ref("description"))
+            .inputLink('.input-header', this.ref("header"))
+            .inputLink('.input-description', this.ref("description"))
+            .textLink('.header', this.ref("header"))
+            .textLink('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name, this.description);
             });
@@ -69,8 +69,8 @@ field2.appendTo('body');
 ```javascript
 //create another DOM field synced with editor object
 const fieldView = new zzField("#template-viewer", editor)
-    .linkText('.header', editor.ref("header"))
-    .linkText('.text', editor.ref("description"));
+    .textLink('.header', editor.ref("header"))
+    .textLink('.text', editor.ref("description"));
 
 fieldView.appendTo('body');
 ```
