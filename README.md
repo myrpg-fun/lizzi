@@ -192,7 +192,10 @@ class FilteredPostCollection extends Collection{
         
         //second filter by search
         if (this.search.find !== ''){
-            posts = posts.filter(p => p.name.indexOf(this.search.find) !== -1 || p.description.indexOf(this.search.find) !== -1);
+            posts = posts.filter(p => 
+                p.name.indexOf(this.search.find) !== -1 ||
+                p.description.indexOf(this.search.find) !== -1
+            );
         }
         
         return posts;
