@@ -210,9 +210,11 @@ class FilteredPostCollection extends Collection{
         })
         
         //create filter proxy
-        new FilterCollection(posts)
+        const filter = new CollectionFilter(posts)
             .setFilterFn(this.filter.bind(this)
             .to(this);
+            
+        this.search.on('set:find', () => filter.refresh());
     }
 }
 
