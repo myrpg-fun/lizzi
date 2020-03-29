@@ -12,7 +12,7 @@ Node and Javascript lizzi (reactive) library.
 Add reactive logic to DOM HTML.
 
 ```html
-<!-- HTML template -->
+<!-- Editor HTML template -->
 <div id="template-editor">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
@@ -23,8 +23,8 @@ Add reactive logic to DOM HTML.
 ```
 
 ```javascript
-class Example extends Data{
-    createField(){
+class ExampleEdit extends Data{
+    createFieldEditor(){
         //created new DOM tree, using template. And then bind links from Data object
         return new zzField("#template-editor", this)
             .inputLink('.input-header', this.ref("header"))
@@ -46,13 +46,13 @@ class Example extends Data{
     }
 }
 
-const editor = new Example();
+const editor = new ExampleEdit();
 //create DOM field
-const field1 = editor.createField();
+const field1 = editor.createFieldEditor();
 field1.appendTo('body');
 
 //create second DOM field synced with editor object
-const field2 = editor.createField();
+const field2 = editor.createFieldEditor();
 field2.appendTo('body');
 ```
 
@@ -75,23 +75,79 @@ const fieldView = new zzField("#template-viewer", editor)
 fieldView.appendTo('body');
 ```
 
+Collection example
+
 ```html
-<!-- add new HTML template -->
+<!-- HTML templates -->
+<div id="template-newpost">
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
+    <button class="submit">Submit</button>
+</div>
+<div id="template-post">
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
+    <button class="submit">Submit</button>
+</div>
 <div id="template-collection">
     <div class="collection"></div>
 </div>
 ```
 
 ```javascript
-//create collection
-const collect = new Collection;
+class Post extends Data{
+    createField(){
+        return new zzField("#template-post", this)
+            .textLink('.header', this.ref("header"))
+            .textLink('.text', this.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", this.name, this.description);
+            });
+    }
+    
+    constructor(){
+        super();
+        
+        this.set({
+            header: 'Example',
+            description: 'This is zzField example'
+        })
+    }
+}
 
-const fieldCollection = new zzField("#template-collection")
-    .dataCollection('.collection', collect, 'createField');
+class PostCollection extends Collection{
+    createEditorField(){
+        const newPost = new Data({
+            'header': '',
+            'description': ''
+        });
+    
+        return new zzField("#template-newpost", this)
+            .inputLink('.input-header', this.ref("header"))
+            .inputLink('.input-description', this.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", newPost.name, newPost.description);
+                this.add( new Post( newPost.values ) );
+            });
+    }
+    
+    createCollectionField(){
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField');
+    }
+    
+    createField(){
+        return new zzField("#template-collection", this)
+            .fieldsCollection('.collection', new Collection([
+                this.createEditorField(),
+                this.createCollectionField(),
+            ]));
+    }
+}
 
-fieldCollection.appendTo('body');
-
-collect.add(editor);
+//create data collections and add it to view
+const posts = new PostCollection;
+posts.createField().appendTo('body');
 ```
 
 ### Class: zzTemplate
