@@ -13,7 +13,7 @@ Add reactive logic to DOM HTML.
 
 ```html
 <!-- HTML template -->
-<div id="template">
+<div id="template-editor">
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
     <input class="input-header" type="text" />
@@ -26,7 +26,7 @@ Add reactive logic to DOM HTML.
 class Example extends Data{
     createField(){
         //created new DOM tree, using template. And then bind links from Data object
-        return new zzField("#template", this)
+        return new zzField("#template-editor", this)
             .linkInput('.input-header', this.ref("header"))
             .linkInput('.input-description', this.ref("description"))
             .linkText('.header', this.ref("header"))
@@ -54,7 +54,24 @@ field1.appendTo('body');
 //create second DOM field synced with editor object
 const field2 = editor.createField();
 field2.appendTo('body');
+```
 
+```html
+<!-- HTML template -->
+<div id="template-viewer">
+    <div class="view">
+        <h1 class="header">Header</h1>
+        <p class="text">Paragraph</p>
+    </div>
+</div>
+```
+
+```javascript
+//create another DOM field synced with editor object
+const fieldView = new zzField("#template-viewer", editor)
+    .linkText('.header', editor.ref("header"))
+    .linkText('.text', editor.ref("description"));
+fieldView.appendTo('body');
 ```
 
 ### Class: zzTemplate
