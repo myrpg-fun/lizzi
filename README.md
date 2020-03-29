@@ -228,7 +228,7 @@ filteredPosts.createField().appendTo('body');
 ```html
 <!-- add empty labels HTML templates -->
 <div id="template-on-empty">No posts</div>
-<div id="template-on-empty-search">Finded no posts</div>
+<div id="template-on-empty-search">Find no results</div>
 ```
 ```javascript
 class FilteredEmptyPostCollection extends FilteredPostCollection{
