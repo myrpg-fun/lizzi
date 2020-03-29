@@ -12,6 +12,7 @@ Add reactive logic to DOM HTML.
     <h1 class="header">Header</h1>
     <p class="text">Paragraph</p>
     <input class="name" type="text" />
+    <textarea class="description"></textarea>
     <button class="submit">Submit</button>
 </div>
 ```
@@ -20,7 +21,8 @@ Add reactive logic to DOM HTML.
 class Example extends Data{
     createFieldDOM(){
         return new zzField("#template", this)
-            .input('.name', this.ref("name"))
+            .input('.name', this.ref("header"))
+            .input('.description', this.ref("description"))
             .text('.header', this.ref("header"))
             .text('.text', this.ref("description"))
             .click('.button', function(){
@@ -33,8 +35,7 @@ class Example extends Data{
         
         this.set({
             header: 'Example',
-            description: 'This is zzField example',
-            name: 'Lizzi'
+            description: 'This is zzField example'
         })
     }
 }
