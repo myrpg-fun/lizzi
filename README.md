@@ -1,6 +1,11 @@
 # lizzi
 Node and Javascript lizzi (reactive) library.
 
+### Why Lizzi library?
+* React.js is ugly for developers. Too hard to understand what's happening in code. 
+* Vue.js is good. But reactive logic binded for HTML and not flex. 
+* Lizzi.js solves this. You have good code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update etc, etc...
+
 ## Template Engine
 
 ### Class: zzField
