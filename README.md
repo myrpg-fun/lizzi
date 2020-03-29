@@ -137,6 +137,8 @@ class PostCollection extends Collection{
     }
     
     createField(){
+        // Here we using #template-collection second time, 
+        // but now we link with div.container permanent collection with 2 DOM fields
         return new zzField("#template-collection", this)
             .fieldsCollection('.collection', new Collection([
                 this.createEditorField(),
@@ -148,6 +150,39 @@ class PostCollection extends Collection{
 //create data collections and add it to view
 const posts = new PostCollection;
 posts.createField().appendTo('body');
+```
+Adding search filter:
+
+```javascript
+class FilteredPostCollection extends Collection{
+    createCollectionField(){
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField');
+    }
+    
+    createField(){
+        return new zzField("#template-collection", this)
+            .fieldsCollection('.collection', new Collection([
+                //add editor from posts
+                this.posts.createEditorField(),
+                //but out posts from filtered collection
+                this.createCollectionField(),
+            ]));
+    }
+    
+    constructor(posts){
+        super();
+        
+        this.posts = posts;
+        
+        new FilterCollection(posts)
+            .setFilterFn(this.filter.bind(this)
+            .to(this);
+    }
+}
+
+const filteredPosts = new FilteredPostCollection(posts);
+filteredPosts.createField().appendTo('body');
 ```
 
 ### Class: zzTemplate
