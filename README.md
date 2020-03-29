@@ -26,7 +26,7 @@ class Example extends Data{
             .text('.header', this.ref("header"))
             .text('.text', this.ref("description"))
             .click('.button', function(){
-                console.log("submit:", this.name);
+                console.log("submit:", this.name, this.description);
             });
     }
     
