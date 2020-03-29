@@ -75,7 +75,7 @@ const fieldView = new zzField("#template-viewer", editor)
 fieldView.appendTo('body');
 ```
 
-Collection example
+#### Collection example
 
 ```html
 <!-- HTML templates -->
@@ -151,7 +151,7 @@ class PostCollection extends Collection{
 const posts = new PostCollection;
 posts.createField().appendTo('body');
 ```
-Search filter example:
+#### Search filter example
 ```html
 <!-- add search input HTML templates -->
 <div id="template-search">
