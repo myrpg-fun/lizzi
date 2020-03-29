@@ -25,7 +25,7 @@ Add reactive logic to DOM HTML.
 ```javascript
 class Example extends Data{
     createField(){
-        //created new DOM tree, using template. And then bind links to Data object
+        //created new DOM tree, using template. And then bind links from Data object
         return new zzField("#template", this)
             .linkInput('.input-header', this.ref("header"))
             .linkInput('.input-description', this.ref("description"))
