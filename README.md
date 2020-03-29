@@ -27,10 +27,10 @@ class Example extends Data{
     createField(){
         //created new DOM tree, using template. And then bind links from Data object
         return new zzField("#template-editor", this)
-            .linkInput('.input-header', this.ref("header"))
-            .linkInput('.input-description', this.ref("description"))
-            .linkText('.header', this.ref("header"))
-            .linkText('.text', this.ref("description"))
+            .linkInputValue('.input-header', this.ref("header"))
+            .linkInputValue('.input-description', this.ref("description"))
+            .linkTextValue('.header', this.ref("header"))
+            .linkTextValue('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name, this.description);
             });
