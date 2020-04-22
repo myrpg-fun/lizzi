@@ -1,12 +1,12 @@
 {
-    "name": "lizzi",
+    "name": "lizzi library",
     "version": "0.0.1",
     "description": "Node and Javascript lizzi (reactive) library",
     "main": "lib/lizzi",
     "scripts": {
         "build": "npm install && gulp",
         "start": "gulp watch",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"No test specified\""
     },
     "repository": {
         "type": "git",
