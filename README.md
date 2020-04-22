@@ -1,7 +1,281 @@
-# lizzi
+# Lizzi
 Node and Javascript lizzi (reactive) library.
 
-## Reactive
+### Why Lizzi library?
+* React.js is ugly for developers. Too hard to understand what's happening in code. 
+* Vue.js is good. But vue logic is binded only for HTML and is not flex.
+* Lizzi.js solves all this. You have good code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
+
+## Template Engine
+
+### Class: zzField
+Clone HTML DOM from template and add reactive logic.
+
+```html
+<!-- Editor HTML template -->
+<div id="template-editor">
+    <h1 class="header">Header</h1>
+    <p class="text">Paragraph</p>
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
+    <button class="submit">Submit</button>
+</div>
+```
+
+```javascript
+class ExampleEdit extends Data{
+    createFieldEditor(){
+        //created new DOM tree, using template. And then bind links from Data object
+        return new zzField("#template-editor", this)
+            .inputLink('.input-header', this.ref("header"))
+            .inputLink('.input-description', this.ref("description"))
+            .textLink('.header', this.ref("header"))
+            .textLink('.text', this.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", this.name, this.description);
+            });
+    }
+    
+    constructor(){
+        super();
+        
+        this.set({
+            header: 'Example',
+            description: 'This is zzField example'
+        })
+    }
+}
+
+const editor = new ExampleEdit();
+//create DOM field
+const field1 = editor.createFieldEditor();
+field1.appendTo('body');
+
+//create second DOM field synced with editor object
+const field2 = editor.createFieldEditor();
+field2.appendTo('body');
+```
+
+```html
+<!-- add new HTML template -->
+<div id="template-viewer">
+    <div class="view">
+        <h1 class="header">Header</h1>
+        <p class="text">Paragraph</p>
+    </div>
+</div>
+```
+
+```javascript
+//create another DOM field synced with editor object
+const fieldView = new zzField("#template-viewer", editor)
+    .textLink('.header', editor.ref("header"))
+    .textLink('.text', editor.ref("description"));
+
+fieldView.appendTo('body');
+```
+
+#### Collection example
+
+```html
+<!-- HTML templates -->
+<div id="template-newpost">
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
+    <button class="submit">Submit</button>
+</div>
+<div id="template-post">
+    <input class="input-header" type="text" />
+    <textarea class="input-description"></textarea>
+    <button class="submit">Submit</button>
+</div>
+<div id="template-collection">
+    <div class="collection"></div>
+</div>
+```
+
+```javascript
+class Post extends Data{
+    createField(){
+        return new zzField("#template-post", this)
+            .textLink('.header', this.ref("header"))
+            .textLink('.text', this.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", this.name, this.description);
+            });
+    }
+    
+    constructor(post){
+        super();
+        
+        this.set({
+            header: post.header || '',
+            description: post.description || ''
+        })
+    }
+}
+
+class PostCollection extends Collection{
+    createEditorField(){
+        const newPost = new Data({
+            header: '',
+            description: ''
+        });
+    
+        return new zzField("#template-newpost", this)
+            .inputLink('.input-header', newPost.ref("header"))
+            .inputLink('.input-description', newPost.ref("description"))
+            .click('.button', function(){
+                console.log("submit:", newPost.name, newPost.description);
+                this.add( new Post( newPost.values() ) );
+            });
+    }
+    
+    createCollectionField(){
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField');
+    }
+    
+    createField(){
+        // Here we using #template-collection second time, 
+        // but now we link with div.container permanent collection with 2 DOM fields
+        return new zzField("#template-collection", this)
+            .fieldsCollection('.collection', new Collection([
+                this.createEditorField(),
+                this.createCollectionField(),
+            ]));
+    }
+}
+
+//create data collections and add it to view
+const posts = new PostCollection;
+posts.createField().appendTo('body');
+```
+#### Search filter example
+```html
+<!-- add search input HTML template -->
+<div id="template-search">
+    <div>
+        Search: <input class="input-search" type="text" />
+    </div>
+</div>
+```
+
+```javascript
+class FilteredPostCollection extends Collection{
+    this.createSearchField(){
+        return new zzField("#template-newpost", this)
+            .inputLink('.input-search', this.search.ref("find"));
+    }
+    
+    createCollectionField(){
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField');
+    }
+    
+    createField(){
+        return new zzField("#template-collection", this)
+            .fieldsCollection('.collection', new Collection([
+                //search field
+                this.createSearchField(),
+                //add editor from posts
+                this.posts.createEditorField(),
+                //but out posts from filtered collection
+                this.createCollectionField(),
+            ]));
+    }
+    
+    // filter used in FilterCollection class
+    filter(posts){
+        //first filter empty posts
+        posts = posts.filter(p => p.name !== '' && p.description !== '');
+        
+        //second filter by search
+        if (this.search.find !== ''){
+            posts = posts.filter(p => 
+                p.name.indexOf(this.search.find) !== -1 ||
+                p.description.indexOf(this.search.find) !== -1
+            );
+        }
+        
+        return posts;
+    }
+    
+    constructor(posts){
+        super();
+        
+        this.posts = posts;
+        this.search = new Data({
+            find: ''
+        })
+        
+        //create filter proxy
+        const filter = new CollectionFilter(posts)
+            .setFilterFn(this.filter.bind(this)
+            .to(this);
+            
+        //refreshing filtered data on any changes search filter variable
+        this.search.on('set:find', () => filter.refresh());
+    }
+}
+
+const filteredPosts = new FilteredPostCollection(posts);
+filteredPosts.createField().appendTo('body');
+```
+#### Check Collection is Empty
+```html
+<!-- add empty labels HTML templates -->
+<div id="template-on-empty">No posts</div>
+<div id="template-on-empty-search">Find no results</div>
+```
+```javascript
+class FilteredEmptyPostCollection extends FilteredPostCollection{
+    isEmpty(){
+        //show empty field, if results is empty
+        const isEmpty = new Data({
+            emptyField: null
+        });
+        
+        const check = function (){
+            if (this.length === 0){
+                //if we have 0 results, check posts count
+                if (this.posts.length === 0){
+                    //if 0, then no posts
+                    isEmpty.emptyField = new zzField("#template-on-empty", this);
+                }else{
+                    //if >0, then search results is empty
+                    isEmpty.emptyField = new zzField("#template-on-empty-search", this);
+                }
+            }else{
+                //remove field if not empty
+                isEmpty.emptyField = null;
+            }
+        }.bind(this);
+        
+        this.on('set:length', check, this);
+        
+        //init current value
+        check();
+        
+        return isEmpty;
+    }
+    
+    createCollectionField(){
+        const isEmpty = this.isEmpty();
+    
+        return new zzField("#template-collection", this)
+            .dataCollection('.collection', this, 'createField')
+            .field('.collection', isEmpty.ref('emptyField'));
+    }
+}
+
+const filteredPosts = new FilteredEmptyPostCollection(posts);
+filteredPosts.createField().appendTo('body');
+```
+
+### Class: zzTemplate
+
+## Reactive Engine
 
 ### Class: Data
 _This class inherits from the [Event](#class-event) class._
@@ -93,6 +367,48 @@ this.downloadSpeed = 10;
 
 `Data.ref(name);` get [zzDataRef](#class-zzdataref) by `name`.
 
+### Class: Collection
+_This class inherits from the [Event](#class-event) class._
+
+`Collection.add(elements);` add elements to collection and emit `add` and `add-values` event.
+
+`Collection.remove(elements);` remove elements from collection and emit `remove` and `remove-values` event.
+
+`Collection.replace(elements);` replace all elements in collection and emit `replace-values` event.
+
+`add`, `remove` emit on add/remove every element in collection.
+* `element` is added/removed element
+* `index` is index
+* `target` is this instance
+
+```javascript
+let elements = new Collection;
+
+elements.on('add', (ev) => console.log('add', ev.element));
+
+mainElements.add([
+    {user: 1, name: 'user 1'}, 
+    {user: 2, name: 'user 2'}
+]);
+mainElements.add( {user: 3, name: 'user 3'} );
+//Prints:
+//add {user: 1, name: 'user 1'}
+//add {user: 2, name: 'user 2'}
+//add {user: 3, name: 'user 3'}
+
+console.log(elements.collection);
+//Prints:
+//[{user: 1, name: 'user 1'}, {user: 2, name: 'user 2'}, {user: 3, name: 'user 3'}]
+```
+
+`add-values`, `remove-values`, `replace-values` emit after add/replace/remove all variables in collection.
+* `values` is added/replaced/removed array of elements
+* `target` is this instance
+
+`Collection.collection` get collection elements as **Array**.
+
+`Collection.length` get size of collection.
+
 ### Class: zzDataRef
 Shortcut reference to variable from [Data](#class-data) object. Used for set variable `set` event listener and get current variable value.
 
@@ -123,26 +439,9 @@ Shortcut reference to variable from [Data](#class-data) object. Used for set var
 
 `zzDataRef.off([listener][, self])` is remove event listener on change variable.
 
-### Class: Collection
-_This class inherits from the [Event](#class-event) class._
-#### Collection Events
-`add`, `remove` emit on add/remove every element in collection.
-* `element` is added/removed element
-* `index` is index
-* `target` is this instance
-
-`add-values`, `replace-values`, `remove-values` emit on add/replace/remove variables in collection.
-* `values` is added/replaced/removed array of elements
-* `target` is this instance
-
-#### Collection Variables
-`Collection.collection` get collection elements as **Array**.
-
-`Collection.length` get size of collection.
-
 ### Class: CollectionFilter
 CollectionFilter used for sort and filter elements in [Collections](#class-collection).
-#### Set in and out collections
+
 `new CollectionFilter(collection)` set inner `collection` for filter/sort.
 
 `CollectionFilter.setFilterFn(function)` filter/sort function. Get array of elements from inner `collection` and return new elements for outer array.
@@ -177,7 +476,7 @@ console.log(viewElements.collection);
 //[{count: 0}, {count: 10}, {count: 5}]
 ```
 
-## Events
+## Events Engine
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
 > For instance: a [Data](class-data) object emits an event each time when data value is changed; a [Collections](#class-collection) emits an event when data added to collection; removed from etc.
