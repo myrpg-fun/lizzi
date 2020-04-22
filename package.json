@@ -1,5 +1,5 @@
 {
-    "name": "lizzi library",
+    "name": "lizzi",
     "version": "0.0.1",
     "description": "Node and Javascript lizzi (reactive) library",
     "main": "lib/lizzi",
@@ -15,6 +15,9 @@
     "keywords": [
         "lizzi",
         "react",
+        "library",
+        "frontend",
+        "backend",
         "framework",
         "node.js",
         "node",
