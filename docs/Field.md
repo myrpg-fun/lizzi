@@ -76,7 +76,7 @@
         .collection('.list', data.ref('collection'), 'createFieldMethod')
         /* append Collection to element */
         .fieldData('.list', new Data, 'createFieldMethod')
-        .fieldData('.list', data.ref('data'), 'createFieldMethod')
+        .fieldData('.list', data.ref('data'), 'createFieldMethod');
 ```
 
 ### Examples
