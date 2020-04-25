@@ -1,14 +1,12 @@
 # Lizzi
-Node and Javascript lizzi (reactive) library.
+Lizzi is reactive javascript library for Node.js and Web UI.
 
 ### Why Lizzi library?
-* React.js is ugly for developers. Too hard to understand what's happening in code. 
-* Vue.js is good. But vue logic is binded only for HTML and is not flex.
-* Lizzi.js solves all this. You have good code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
+Lizzi.js have good independed (HTML / JS) code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
 
 ## Template Engine
 
-### Class: zzField
+### Class: Field
 Clone HTML DOM from template and add reactive logic.
 
 ```html
@@ -25,12 +23,12 @@ Clone HTML DOM from template and add reactive logic.
 ```javascript
 class ExampleEdit extends Data{
     createFieldEditor(){
-        //created new DOM tree, using template. And then bind links from Data object
-        return new zzField("#template-editor", this)
-            .inputLink('.input-header', this.ref("header"))
-            .inputLink('.input-description', this.ref("description"))
-            .textLink('.header', this.ref("header"))
-            .textLink('.text', this.ref("description"))
+        //clone DOM tree from template. And then bind links from Data object
+        return new Field("#template-editor", this)
+            .input('.input-header', this.ref("header"))
+            .input('.input-description', this.ref("description"))
+            .text('.header', this.ref("header"))
+            .text('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name, this.description);
             });
@@ -68,9 +66,9 @@ field2.appendTo('body');
 
 ```javascript
 //create another DOM field synced with editor object
-const fieldView = new zzField("#template-viewer", editor)
-    .textLink('.header', editor.ref("header"))
-    .textLink('.text', editor.ref("description"));
+const fieldView = new Field("#template-viewer", editor)
+    .text('.header', editor.ref("header"))
+    .text('.text', editor.ref("description"));
 
 fieldView.appendTo('body');
 ```
@@ -97,9 +95,9 @@ fieldView.appendTo('body');
 ```javascript
 class Post extends Data{
     createField(){
-        return new zzField("#template-post", this)
-            .textLink('.header', this.ref("header"))
-            .textLink('.text', this.ref("description"))
+        return new Field("#template-post", this)
+            .text('.header', this.ref("header"))
+            .text('.text', this.ref("description"))
             .click('.button', function(){
                 console.log("submit:", this.name, this.description);
             });
@@ -122,9 +120,9 @@ class PostCollection extends Collection{
             description: ''
         });
     
-        return new zzField("#template-newpost", this)
-            .inputLink('.input-header', newPost.ref("header"))
-            .inputLink('.input-description', newPost.ref("description"))
+        return new Field("#template-newpost", this)
+            .input('.input-header', newPost.ref("header"))
+            .input('.input-description', newPost.ref("description"))
             .click('.button', function(){
                 console.log("submit:", newPost.name, newPost.description);
                 this.add( new Post( newPost.values() ) );
@@ -132,15 +130,15 @@ class PostCollection extends Collection{
     }
     
     createCollectionField(){
-        return new zzField("#template-collection", this)
-            .dataCollection('.collection', this, 'createField');
+        return new Field("#template-collection", this)
+            .collection('.collection', this, 'createField');
     }
     
     createField(){
         // Here we using #template-collection second time, 
         // but now we link with div.container permanent collection with 2 DOM fields
         return new zzField("#template-collection", this)
-            .fieldsCollection('.collection', new Collection([
+            .collection('.collection', new Collection([
                 this.createEditorField(),
                 this.createCollectionField(),
             ]));
@@ -165,17 +163,17 @@ posts.createField().appendTo('body');
 class FilteredPostCollection extends Collection{
     this.createSearchField(){
         return new zzField("#template-newpost", this)
-            .inputLink('.input-search', this.search.ref("find"));
+            .input('.input-search', this.search.ref("find"));
     }
     
     createCollectionField(){
         return new zzField("#template-collection", this)
-            .dataCollection('.collection', this, 'createField');
+            .collection('.collection', this, 'createField');
     }
     
     createField(){
         return new zzField("#template-collection", this)
-            .fieldsCollection('.collection', new Collection([
+            .collection('.collection', new Collection([
                 //search field
                 this.createSearchField(),
                 //add editor from posts
@@ -252,7 +250,7 @@ class FilteredEmptyPostCollection extends FilteredPostCollection{
             }
         }.bind(this);
         
-        this.on('set:length', check, this);
+        this.on('change-values', check, this);
         
         //init current value
         check();
@@ -264,7 +262,7 @@ class FilteredEmptyPostCollection extends FilteredPostCollection{
         const isEmpty = this.isEmpty();
     
         return new zzField("#template-collection", this)
-            .dataCollection('.collection', this, 'createField')
+            .collection('.collection', this, 'createField')
             .field('.collection', isEmpty.ref('emptyField'));
     }
 }
