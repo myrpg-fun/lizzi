@@ -144,28 +144,6 @@ class Cards extends Collection{
     }
 };
 
-class CardsView extends Collection{
-    createField(){
-        return new Field(T.find('#admin-cards'), this)
-            //append to .cards all fields created by Card.createField which are in this Collection
-            .collection('.cards', this, 'createField')
-            //append to .add field created by AddCard.createField
-            .fieldData('.add', new AddCard(this.collection), 'createField')
-            //link input.search with DSearch.search variable
-            .input('.search', this.DSearch.ref('search'));
-    }
-    
-    constructor(collection){
-        super();
-        
-        this.collection = collection;
-        
-        this.DSearch = new Data({
-            search: ''
-        });
-    }
-};
-
 class SearchFilter extends CollectionFilter{
     filter(values){
         //make index for all elements
@@ -189,10 +167,34 @@ class SearchFilter extends CollectionFilter{
     }
 }
 
+class CardsView extends Collection{
+    createField(){
+        return new Field(T.find('#admin-cards'), this)
+            //append to .cards all fields created by Card.createField which are in this Collection
+            .collection('.cards', this, 'createField')
+            //append to .add field created by AddCard.createField
+            .fieldData('.add', this.addCard, 'createField')
+            //link input.search with DSearch.search variable
+            .input('.search', this.DSearch.ref('search'));
+    }
+    
+    constructor(WCards){
+        super();
+        
+        this.WCardsCollection = WCards;        
+        this.addCard = new AddCard(WCards);
+        
+        this.DSearch = new Data({
+            search: ''
+        });
+        
+        //filter get array from WCards, filter with DSearch.search and replace results array to this Collection
+        new SearchFilter(WCards, this.DSearch.ref('search')).to(this);
+    }
+};
+
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
-
-new SearchFilter(WCards, WCardsView.DSearch.ref('search')).to(WCardsView);
 
 WCardsView.createField().appendTo('body');
 
