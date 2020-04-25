@@ -1,5 +1,5 @@
 # Lizzi
-Node and Javascript lizzi (reactive) library.
+Lizzi is reactive javascript library for Node.js and Web UI.
 
 ### Why Lizzi library?
 * React.js is ugly for developers. Too hard to understand what's happening in code. 
