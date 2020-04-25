@@ -6,7 +6,7 @@ Lizzi.js have good independed (HTML / JS) code for developers, and you can bind 
 
 ## Template Engine
 
-### Class: zzField
+### Class: Field
 Clone HTML DOM from template and add reactive logic.
 
 ```html
@@ -23,7 +23,7 @@ Clone HTML DOM from template and add reactive logic.
 ```javascript
 class ExampleEdit extends Data{
     createFieldEditor(){
-        //created new DOM tree, using template. And then bind links from Data object
+        //clone DOM tree from template. And then bind links from Data object
         return new Field("#template-editor", this)
             .input('.input-header', this.ref("header"))
             .input('.input-description', this.ref("description"))
