@@ -2,9 +2,7 @@
 Lizzi is reactive javascript library for Node.js and Web UI.
 
 ### Why Lizzi library?
-* React.js is ugly for developers. Too hard to understand what's happening in code. 
-* Vue.js is good. But vue logic is binded only for HTML and is not flex.
-* Lizzi.js solves all this. You have good code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
+Lizzi.js have good independed (HTML / JS) code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
 
 ## Template Engine
 
