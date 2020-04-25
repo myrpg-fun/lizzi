@@ -92,7 +92,7 @@ this.downloadSpeed = 10;
 `Data.ref(name);` get [zzDataRef](#class-zzdataref) by `name`.
 
 ### Class: Collection
-_This class inherits from the [Event](#class-event) class._
+_This class inherits from the [Event](./Event.md#class-event) class._
 
 `Collection.add(elements);` add elements to collection and emit `add` and `add-values` event.
 
