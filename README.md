@@ -9,6 +9,52 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * [HTML Template Class](./docs/Field.md)
 * [Event Classes](./docs/Event.md).
 
+```html
+<div id="admin-cards">
+    <div>
+        <input type="text" class="search" placeholder="Search">
+    </div>
+    <div class="cards"></div>
+    <div class="add"></div>
+</div>
+
+<div id="admin-card">
+    <div class="row">
+        <div class="id"></div>
+        <div class="option-a">
+            <input type="text" class="form-control option-a" placeholder="Option A">
+        </div>
+        <div class="option-b">
+            <input type="text" class="form-control option-b" placeholder="Option B">
+        </div>
+        <div class="checkbox"><span class="opt-checkbox"></span> Checkbox</div>
+        <div class="remove">X</div>
+    </div>
+    <div class="card-error error"></div>
+</div>
+
+<div id="admin-card-add">
+    <form class="add-form">
+        <div class="add-header">Would You Rather...</div>
+        <div class="option-a">
+            <input type="text" class="form-control option-a" placeholder="Option A">
+            <div class="icon"></div>
+        </div>
+        <div class="add-or">or</div>
+        <div class="option-b">
+            <input type="text" class="form-control option-b" placeholder="Option B">
+            <div class="icon"></div>
+        </div>
+        <div class="checkbox">
+            <span class="opt-checkbox"></span> is Checkbox
+        </div>
+        <div class="margin-add-button">
+            <button type="submit" class="btn btn-primary submit">Add new card</button>
+        </div>
+    </form>
+</div>
+```
+
 ```javascript
 const Field = require('../../lizzi/Field');
 const {Data, Collection, CollectionFilter} = require('../../lizzi');
