@@ -1,11 +1,18 @@
-## Template Engine
+# Template Engine
 
-### Class: Field
+## Class: Field
 ```javascript
     let Field = require('lizzi/Field');
 ```
 
 Clone HTML DOM from template and add reactive logic.
+
+### Methods
+#### Field.text(selector, text)
+Add text reference to element.
+
+
+## Examples
 
 ```html
 <!-- Editor HTML template -->
