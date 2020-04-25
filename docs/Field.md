@@ -24,7 +24,7 @@
         /* Add html reference to element. */
         .text('.div', data.ref("html_variable"))
         .text('.div', '<span></span>')
-        .text('.div', ['<div>', data.ref("tag"), '</div>']);
+        .text('.div', ['<div>', data.ref("tag"), '</div>'])
         /* Add switcher to element */
         .switch('.switch', data.ref("checkbox"))
         .switch('.switch', data.ref("checkbox"), [
