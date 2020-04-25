@@ -56,11 +56,12 @@ Event `set-values` emit one time after script ends.
 ```javascript
 class userSettings extends Data{
     saveToDB(db){
-        this.on('set-values', function(ev){
+        /* wait after set all values and then emit listener */
+        this.on('set', EventAfterAll(function(ev){
             console.log('lazy save values one time', this.values());
             console.log('changed only', ev.values);
             db.update(this.values());
-        })
+        }))
     }
 
     constructor(){
