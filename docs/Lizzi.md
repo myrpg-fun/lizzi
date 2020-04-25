@@ -193,6 +193,10 @@ mainElements.add([
     {count: 5},
 ]);
 
+console.log(viewElements.collection);
+//Prints:
+//[{count: 0}]
+
 data.count = 10;
 
 console.log(viewElements.collection);
