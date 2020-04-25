@@ -141,8 +141,8 @@ class SearchFilter extends CollectionFilter{
     }
 }
 
-const WCards = new Cards;
-const WCardsView = new CardsView;
+const WCards = new Cards();
+const WCardsView = new CardsView(WCards);
 
 new SearchFilter(WCards, WCardsView.DSearch.ref('search')).to(WCardsView);
 
