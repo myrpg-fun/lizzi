@@ -250,7 +250,7 @@ class FilteredEmptyPostCollection extends FilteredPostCollection{
             }
         }.bind(this);
         
-        this.on('set:length', check, this);
+        this.on('change-values', check, this);
         
         //init current value
         check();
