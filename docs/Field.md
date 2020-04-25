@@ -6,6 +6,26 @@
 
     //Clone HTML DOM from template and add reactive logic.
     let fView = new Field(new zzTemplate("#template"))
+        /* add event listener, and remove it when Field removed */
+        .on(object, 'event-name', function(...eventArgs){
+            //event listener, this = thisField
+        })
+        .on(object, 'event-name', function(...eventArgs){
+            //event listener, this = thisField
+        }, [...run_listener_with_this_arguments_when_Field_init])
+        
+        /* append Field to element */
+        .field('.element', data.ref('field'))
+        .field('.element', new Field)
+        
+        /* append Collection of Data to element */
+        .collection('.list', new Collection, 'createFieldMethod')
+        .collection('.list', data.ref('collection'), 'createFieldMethod')
+        
+        /* append Collection to element */
+        .fieldData('.list', new Data, 'createFieldMethod')
+        .fieldData('.list', data.ref('data'), 'createFieldMethod')
+        
         /* Add text reference to element. */
         .text('.text', data.ref("string_variable"))
         .text('.text', 'text string')
@@ -69,27 +89,7 @@
             //on add field to DOM
         }, function(thisField){
             //on remove field from DOM
-        })
-        
-        /* add event listener, and remove it when Field removed */
-        .on(object, 'event-name', function(...eventArgs){
-            //event listener, this = thisField
-        })
-        .on(object, 'event-name', function(...eventArgs){
-            //event listener, this = thisField
-        }, [...run_listener_with_this_arguments_when_Field_init])
-        
-        /* append Field to element */
-        .field('.element', data.ref('field'))
-        .field('.element', new Field)
-        
-        /* append Collection of Data to element */
-        .collection('.list', new Collection, 'createFieldMethod')
-        .collection('.list', data.ref('collection'), 'createFieldMethod')
-        
-        /* append Collection to element */
-        .fieldData('.list', new Data, 'createFieldMethod')
-        .fieldData('.list', data.ref('data'), 'createFieldMethod');
+        });
 ```
 
 ### Examples
