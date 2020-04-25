@@ -3,16 +3,83 @@
 ## Class: Field
 ```javascript
     let Field = require('lizzi/Field');
+
+    //Clone HTML DOM from template and add reactive logic.
+    let fView = new Field(new zzTemplate("#template"))
+        /* Add text reference to element. */
+        .text('.text', data.ref("string_variable"))
+        .text('.text', 'text string')
+        .text('.text', ['array of strings', data.ref("and"), data.ref("variables")]);
+        /* link reference to input/textarea element. */
+        .input('.textarea', data.ref("any"))
+        .input('.int', data.ref("onlyInteger"), (value) => (value) => {
+            let val = parseInt(value);
+            //if undefined then do not set variable
+            return isNaN(val)?undefined:val;
+        })
+        .inputInteger('.int', data.ref("onlyInteger"))
+        .inputFloat('.float', data.ref("onlyFloat"))
+        /* set text height to textarea */
+        .autoResizeTextarea('.textarea')
+        /* Add html reference to element. */
+        .text('.div', data.ref("html_variable"))
+        .text('.div', '<span></span>')
+        .text('.div', ['<div>', data.ref("tag"), '</div>']);
+        /* Add switcher to element */
+        .switch('.switch', data.ref("checkbox"))
+        .switch('.switch', data.ref("checkbox"), [
+            {value: false, class: 'off'},
+            {value: true, class: 'on'}
+        ])
+        .switch('.switch', data.ref("value"), [
+            {value: 0, class: 'off'},
+            {value: 1, class: 'ask'},
+            {value: 2, class: 'res'},
+            {value: 3, class: 'ok'},
+            //...
+        ])
+        /* add attribute reference to element */
+        .attr('.element', 'style', data.ref("style"))
+        /* add css style reference to element */
+        .style('.element', 'height', data.ref("height"))
+        .style('.element', {
+            'height': data.ref("height"),
+            'width': data.ref("width")
+        })
+        /* set class reference to element */
+        .class('.element', data.ref("classes"))
+        .class('.element', {
+            'on': data.ref("ifTrue")
+        })
+        /* set click function to element */
+        .click('.element', function(thisField){
+            //...
+        }, this)
+        /* set init and remove function */
+        .init(function(thisField){
+            //on add field to DOM
+        }, function(thisField){
+            //on remove field from DOM
+        })
+        /* add event listener, and remove it when Field removed */
+        .on(object, 'event-name', function(...eventArgs){
+            //event listener, this = thisField
+        })
+        .on(object, 'event-name', function(...eventArgs){
+            //event listener, this = thisField
+        }, [...run_listener_with_this_arguments_when_Field_init])
+        /* append Field to element */
+        .field('.element', data.ref('field'))
+        .field('.element', Field)
+        /* append Collection of Data to element */
+        .collection('.list', Collection, 'createFieldMethod')
+        .collection('.list', data.ref('collection'), 'createFieldMethod')
+        /* append Collection to element */
+        .fieldData('.list', Data, 'createFieldMethod')
+        .fieldData('.list', data.ref('data'), 'createFieldMethod')
 ```
 
-Clone HTML DOM from template and add reactive logic.
-
-### Methods
-#### Field.text(selector, text)
-Add text reference to element.
-
-
-## Examples
+### Examples
 
 ```html
 <!-- Editor HTML template -->
