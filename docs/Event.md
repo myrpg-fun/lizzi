@@ -1,5 +1,8 @@
-
 ## Events Engine
+```javascript
+let {Event, EventListener, EventStack} = require('lizzi/event');
+```
+
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
 > For instance: a [Data](./Lizzi.md#class-data) object emits an event each time when data value is changed; a [Collections](./Lizzi.md#class-collection) emits an event when data added to collection; removed from etc.
