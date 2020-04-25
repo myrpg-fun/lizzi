@@ -70,12 +70,12 @@
         }, [...run_listener_with_this_arguments_when_Field_init])
         /* append Field to element */
         .field('.element', data.ref('field'))
-        .field('.element', Field)
+        .field('.element', new Field)
         /* append Collection of Data to element */
-        .collection('.list', Collection, 'createFieldMethod')
+        .collection('.list', new Collection, 'createFieldMethod')
         .collection('.list', data.ref('collection'), 'createFieldMethod')
         /* append Collection to element */
-        .fieldData('.list', Data, 'createFieldMethod')
+        .fieldData('.list', new Data, 'createFieldMethod')
         .fieldData('.list', data.ref('data'), 'createFieldMethod')
 ```
 
