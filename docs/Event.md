@@ -2,7 +2,7 @@
 ## Events Engine
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
 
-> For instance: a [Data](class-data) object emits an event each time when data value is changed; a [Collections](#class-collection) emits an event when data added to collection; removed from etc.
+> For instance: a [Data](./Lizzi#class-data) object emits an event each time when data value is changed; a [Collections](./Lizzi#class-collection) emits an event when data added to collection; removed from etc.
 
 All objects that emit events are instances of the [Event](#class-event) class.
 
