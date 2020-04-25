@@ -103,6 +103,8 @@ connection.on('connected', function(socket) {
 #### Remove listener
 `EventListener.off();` removes current _eventListener_ from class.
 
+`EventListener.addToStack(eventStack);` add current  _eventListener_ to [EventStack](#class-eventstack).
+
 ### Class: EventStack
 #### Add listeners to group
 `EventStack.add([eventListener, ...]);` add current _eventListener_ to group stack.
