@@ -1,6 +1,10 @@
 
 ## Reactive Engine
 
+```javascript
+    let {Data, Collection, zzDataRef, CollectionFilter} =  require('lizzi');
+```
+
 ### Class: Data
 _This class inherits from the [Event](./Event.md#class-event) class._
 
