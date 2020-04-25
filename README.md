@@ -2,8 +2,11 @@
 Lizzi is reactive javascript library for Node.js and Web UI.
 
 ### Why Lizzi library?
-* Lizzi is easy to use. You make it fast.
+* Lizzi is easy to use. It just link Data with any html Fields and make it reactive :)
 * Lizzi have independed HTML, CSS and JS code.
+* Lizzi can use to easy sync Data between Database, Node.js Server, Javascript Client, Any UI you want.
+* UI can be anything: Html, Canvas Draw, Google Maps, Any Graphs. All updated in realtime.
+* You can easily create new Fields like Color UI element etc. And get color data from Data linked object :)
 ### Manual
 * [Reactive Classes](./docs/Lizzi.md)
 * [HTML Template Class](./docs/Field.md)
@@ -151,6 +154,7 @@ class SearchFilter extends CollectionFilter{
     
         //filter results
         if (this.searchRef.value){
+            //get value from reference searchRef
             let value = this.searchRef.value.toLowerCase();
             return values.filter(d => d.todo.toLowerCase().indexOf(value) !== -1);
         }
