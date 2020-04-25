@@ -107,12 +107,14 @@ class CardsView extends Collection{
     createField(){
         return new Field(T.find('#admin-cards'), this)
             .collection('.cards', this, 'createField')
-            .fieldData('.add', new AddCard, 'createField')
+            .fieldData('.add', new AddCard(this.collection), 'createField')
             .input('.search', this.DSearch.ref('search'));
     }
     
-    constructor(){
+    constructor(collection){
         super();
+        
+        this.collection = collection;
         
         this.DSearch = new Data({
             search: ''
@@ -143,5 +145,7 @@ const WCards = new Cards;
 const WCardsView = new CardsView;
 
 new SearchFilter(WCards, WCardsView.DSearch.ref('search')).to(WCardsView);
+
+WCardsView.createField().appendTo('body');
 
 ```
