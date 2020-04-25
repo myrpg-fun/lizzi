@@ -163,7 +163,7 @@ posts.createField().appendTo('body');
 class FilteredPostCollection extends Collection{
     this.createSearchField(){
         return new zzField("#template-newpost", this)
-            .inputLink('.input-search', this.search.ref("find"));
+            .input('.input-search', this.search.ref("find"));
     }
     
     createCollectionField(){
