@@ -1,6 +1,6 @@
 ## Events Engine
 ```javascript
-let {Event, EventListener, EventStack} = require('lizzi/event');
+let {Event, EventListener, EventStack, EventAfterAll} = require('lizzi/event');
 ```
 
 Much of the lizzi.js API is built around an idiomatic asynchronous event-driven architecture.
