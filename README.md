@@ -2,7 +2,8 @@
 Lizzi is reactive javascript library for Node.js and Web UI.
 
 ### Why Lizzi library?
-Lizzi.js have good independed (HTML / JS) code for developers, and you can bind your logic to any way, using just ONE dataflow to server-database-updates, client-server-datasync, client-UI-update, google-maps-update, canvas-update etc, etc...
+* Lizzi is easy to use. You make it fast.
+* Lizzi have independed HTML, CSS and JS code.
 
 ## Template Engine
 
@@ -39,7 +40,7 @@ class ExampleEdit extends Data{
         
         this.set({
             header: 'Example',
-            description: 'This is zzField example'
+            description: 'This is Field example'
         })
     }
 }
@@ -137,7 +138,7 @@ class PostCollection extends Collection{
     createField(){
         // Here we using #template-collection second time, 
         // but now we link with div.container permanent collection with 2 DOM fields
-        return new zzField("#template-collection", this)
+        return new Field("#template-collection", this)
             .collection('.collection', new Collection([
                 this.createEditorField(),
                 this.createCollectionField(),
@@ -162,17 +163,17 @@ posts.createField().appendTo('body');
 ```javascript
 class FilteredPostCollection extends Collection{
     this.createSearchField(){
-        return new zzField("#template-newpost", this)
+        return new Field("#template-newpost", this)
             .input('.input-search', this.search.ref("find"));
     }
     
     createCollectionField(){
-        return new zzField("#template-collection", this)
+        return new Field("#template-collection", this)
             .collection('.collection', this, 'createField');
     }
     
     createField(){
-        return new zzField("#template-collection", this)
+        return new Field("#template-collection", this)
             .collection('.collection', new Collection([
                 //search field
                 this.createSearchField(),
@@ -239,10 +240,10 @@ class FilteredEmptyPostCollection extends FilteredPostCollection{
                 //if we have 0 results, check posts count
                 if (this.posts.length === 0){
                     //if 0, then no posts
-                    isEmpty.emptyField = new zzField("#template-on-empty", this);
+                    isEmpty.emptyField = new Field("#template-on-empty", this);
                 }else{
                     //if >0, then search results is empty
-                    isEmpty.emptyField = new zzField("#template-on-empty-search", this);
+                    isEmpty.emptyField = new Field("#template-on-empty-search", this);
                 }
             }else{
                 //remove field if not empty
@@ -261,7 +262,7 @@ class FilteredEmptyPostCollection extends FilteredPostCollection{
     createCollectionField(){
         const isEmpty = this.isEmpty();
     
-        return new zzField("#template-collection", this)
+        return new Field("#template-collection", this)
             .collection('.collection', this, 'createField')
             .field('.collection', isEmpty.ref('emptyField'));
     }
