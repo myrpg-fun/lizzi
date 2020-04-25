@@ -2,7 +2,7 @@
 ## Reactive Engine
 
 ### Class: Data
-_This class inherits from the [Event](#class-event) class._
+_This class inherits from the [Event](./Event#class-event) class._
 
 `Data.set({ ... });` register reactive variable and set values.
 
