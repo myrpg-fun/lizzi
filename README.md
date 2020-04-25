@@ -19,7 +19,7 @@ class AddCard extends Data{
             .preventSubmit('.add-form')
             .input('input.option-a', this.ref('option1'))
             .input('input.option-b', this.ref('option2'))
-            .switch('.rude', this.ref('isCheckbox'))
+            .switch('.checkbox', this.ref('isCheckbox'))
             .init(function(field){
                 this.on('focus', function(){
                     let input = field.find('input.option-a');
