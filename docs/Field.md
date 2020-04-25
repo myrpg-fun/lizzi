@@ -9,7 +9,7 @@
         /* Add text reference to element. */
         .text('.text', data.ref("string_variable"))
         .text('.text', 'text string')
-        .text('.text', ['array of strings', data.ref("and"), data.ref("variables")]);
+        .text('.text', ['array of strings', data.ref("and"), data.ref("variables")])
         /* link reference to input/textarea element. */
         .input('.textarea', data.ref("any"))
         .input('.int', data.ref("onlyInteger"), (value) => (value) => {
