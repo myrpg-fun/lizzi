@@ -2,7 +2,7 @@
 ## Reactive Engine
 
 ```javascript
-    let {Data, Collection, zzDataRef, CollectionFilter} =  require('lizzi');
+let {Data, Collection, zzDataRef, CollectionFilter} = require('lizzi');
 ```
 
 ### Class: Data
