@@ -64,18 +64,18 @@ const {Data, Collection, CollectionFilter} = require('../../lizzi');
 class AddCard extends Data{
     /* create new Field UI */
     createField(){
-        /* clone #admin-card-add from template */
+        // clone #admin-card-add from template
         return new Field(T.find('#admin-card-add'), this)
-            /* prevent submit event from <form> */
+            // prevent submit event from <form>
             .preventSubmit('.add-form')
-            /* link this.option1 variable with input.option-a */
+            // link this.option1 variable with input.option-a
             .input('input.option-a', this.ref('option1'))
-            /* link this.option2 variable with input.option-b */
+            // link this.option2 variable with input.option-b
             .input('input.option-b', this.ref('option2'))
-            /* link this.isCheckbox variable with .checkbox div element */
+            // link this.isCheckbox variable with .checkbox div element
             .switch('.checkbox', this.ref('isCheckbox'))
             .init(function(field){
-                /* when Field created, add focus react event */
+                // when Field created, add focus react event
                 this.on('focus', function(){
                     let input = field.find('input.option-a');
                     input = input.elements[0];
@@ -85,7 +85,7 @@ class AddCard extends Data{
                 this.off('focus', field);
             }.bind(this))
             .click('.submit', function(){
-                /* when we submit, clear all fields and add new Card to our cards collection */
+                // when we submit, clear all fields and add new Card to our cards collection
                 this.option1 = '';
                 this.isCheckbox = false;
                 this.option2 = '';
@@ -100,7 +100,7 @@ class AddCard extends Data{
         
         this.collection = collection;
         
-        /* initialize reactive variables */
+        // initialize reactive variables
         this.set({
             option1: '',
             option2: '',
