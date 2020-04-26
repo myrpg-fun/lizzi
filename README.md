@@ -9,7 +9,7 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * You can easily create new Fields like Color UI element etc. And get color data from Data linked object :)
 ### Manual
 * [Reactive Classes](./docs/Lizzi.md)
-* [HTML Template Class](./docs/Field.md)
+* [Field Class](./docs/Field.md) - HTML UI link class
 * [Event Classes](./docs/Event.md).
 ### TODO Example
 ```html
