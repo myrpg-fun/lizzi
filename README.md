@@ -168,8 +168,7 @@ class Cards extends Collection{
         
         //when element added to Collection
         this.on('add', function(data){
-            //link to data events
-            data.off(this);
+            //link Card events to this class
             data.on('admin:remove', function(){
                 this.remove(data);
             }, this);
@@ -177,6 +176,7 @@ class Cards extends Collection{
         
         //when element removed from Collection
         this.on('remove', function(data){
+            //remove all linked events
             data.off(this);
         }, this);
     }
