@@ -98,11 +98,17 @@ class AddCard extends Data{
 class Card extends Data{
     createField(){
         return new Field(T.find('#admin-card'), this)
-            .text('.id', this.ref('idTxt'))
+            //when index set, then change text in .id element (draw 1. 2. 3. etc)
+            .text('.id', [this.ref('index'), '.'])
+            //if we click on remove element, then emit 'admin:remove'
             .click('.remove', function(){
                 this.emit('admin:remove');
             }.bind(this))
+            //switch this.done by click on .done element
+            //adds 'on' to class .done element when this.done is true
+            //adds 'off' to class .done element when this.done is false
             .switch('.done', this.ref('done'))
+            //add to .row element class value from doneClass
             .class('.row', this.ref('doneClass'))
             .text('.todo', this.ref('todo'));
     }
@@ -110,19 +116,23 @@ class Card extends Data{
     constructor(data){
         super(data);
         
+        //set and make todo value reactive
         this.set({
             todo: data.todo || ''
         });
 
+        //set and make index, idTxt, doneClass, done values reactive
         this.set({
             index: 0,
-            idTxt: 0+'.',
             doneClass: '',
             done: false
         });
         
-        this.on('set:done', e => this.doneClass = this.done?'is-done':'', this).run();
-        this.on('set:index', e => this.idTxt = e.value+'.', this);
+        //when done changed, then change doneClass
+        this.on('set:done', e => this.doneClass = this.done?'is-done':'', this)
+            //run listener function instanly with empty arguments
+            .run();
+        //when todo or done changed, then current class emit 'admin:change' event
         this.on(['set:todo', 'set:done'], () => this.emit('admin:change'), this);
     }
 }
