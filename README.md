@@ -101,9 +101,7 @@ class Card extends Data{
             //when index set, then change text in .id element (draw 1. 2. 3. etc)
             .text('.id', [this.ref('index'), '.'])
             //if we click on remove element, then emit 'admin:remove'
-            .click('.remove', function(){
-                this.emit('admin:remove');
-            }.bind(this))
+            .click('.remove', () => this.emit('admin:remove') )
             //switch this.done by click on .done element
             //adds 'on' to class .done element when this.done is true
             //adds 'off' to class .done element when this.done is false
