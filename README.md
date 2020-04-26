@@ -126,8 +126,9 @@ class Card extends Data{
             done: false
         });
         
-        //when done changed, then change doneClass
-        this.on('set:done', e => this.doneClass = this.done?'is-done':'', this)
+        //when done is true, then add to done class 'line-through'
+        //when done is false, then do empty done class
+        this.on('set:done', e => this.doneClass = this.done?'line-through':'', this)
             //run listener function instanly with empty arguments
             .run();
         //when todo or done changed, then current class emit 'admin:change' event
