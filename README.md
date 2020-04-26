@@ -237,7 +237,7 @@ module.exports = {Cards, CardsView};
 
 `index.js`
 ```javascript
-const {Cards, CardsView} = require('./Cards');
+const {Cards, CardsView} = require('./cards');
 
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
