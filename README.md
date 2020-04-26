@@ -8,9 +8,9 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * UI can be anything: Html, Canvas Draw, Google Maps, Any Graphs. All updated in realtime.
 * You can easily create new Fields like Color UI element etc. And get color data from Data linked object :)
 ### Manual
-* [Reactive Classes](./docs/Lizzi.md)
+* [Reactive Classes](./docs/Lizzi.md) - Data, Collection classes
 * [Field Class](./docs/Field.md) - HTML UI link class
-* [Event Classes](./docs/Event.md).
+* [Event Classes](./docs/Event.md) - new look at Events
 ### TODO Example
 ```html
 <!-- HTML template -->
