@@ -119,7 +119,7 @@ class Card extends Data{
             todo: data.todo || ''
         });
 
-        //set and make index, idTxt, doneClass, done values reactive
+        //set and make index, doneClass and done values reactive
         this.set({
             index: 0,
             doneClass: '',
