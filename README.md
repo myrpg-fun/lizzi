@@ -254,7 +254,7 @@ const T = require('./template');
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
 
-//When templates is loaded
+//When templates are loaded
 T.on('load', function(){
     //add view to page
     WCardsView.createField().appendTo('body');
