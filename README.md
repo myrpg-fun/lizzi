@@ -12,6 +12,7 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * [Field Class](./docs/Field.md) - HTML UI link class
 * [Event Classes](./docs/Event.md) - new look at Events
 ### TODO Example
+`addCard.html`
 ```html
 <!-- HTML template -->
 <div id="admin-card-add">
@@ -25,30 +26,13 @@ Lizzi is reactive javascript library for Node.js and Web UI.
         </div>
     </form>
 </div>
-
-<div id="admin-card">
-    <div class="row">
-        <div class="id"></div>
-        <div class="todo"></div>
-        <div class="checkbox done">
-            <span class="opt-checkbox"></span> Done
-        </div>
-        <div class="remove">X</div>
-    </div>
-</div>
-
-<div id="admin-cards">
-    <div>
-        <input type="text" class="search" placeholder="Search tasks">
-    </div>
-    <div class="cards"></div>
-    <div class="add"></div>
-</div>
 ```
 
+`addCard.js`
 ```javascript
 const Field = require('lizzi/Field');
-const {Data, Collection, CollectionFilter} = require('lizzi');
+const {Data} = require('lizzi');
+const Card = require('./card');
 
 /* Class for adding new card */
 class AddCard extends Data{
@@ -95,6 +79,28 @@ class AddCard extends Data{
     }
 }
 
+module.exports = AddCard;
+```
+
+`card.html`
+```html
+<div id="admin-card">
+    <div class="row">
+        <div class="id"></div>
+        <div class="todo"></div>
+        <div class="checkbox done">
+            <span class="opt-checkbox"></span> Done
+        </div>
+        <div class="remove">X</div>
+    </div>
+</div>
+```
+
+`card.js`
+```javascript
+const Field = require('lizzi/Field');
+const {Data} = require('lizzi');
+
 class Card extends Data{
     createField(){
         return new Field(T.find('#admin-card'), this)
@@ -135,6 +141,26 @@ class Card extends Data{
         this.on(['set:todo', 'set:done'], () => this.emit('admin:change'), this);
     }
 }
+
+module.exports = Card;
+```
+
+`cards.html`
+```html
+<div id="admin-cards">
+    <div>
+        <input type="text" class="search" placeholder="Search tasks">
+    </div>
+    <div class="cards"></div>
+    <div class="add"></div>
+</div>
+```
+
+`cards.js`
+```javascript
+const Field = require('lizzi/Field');
+const {Data, Collection, CollectionFilter} = require('lizzi');
+const AddCard = require('./addCard');
 
 class Cards extends Collection{
     constructor(){
@@ -206,9 +232,16 @@ class CardsView extends Collection{
     }
 };
 
+module.exports = {Cards, CardsView};
+```
+
+`index.js`
+```javascript
+const {Cards, CardsView} = require('./Cards');
+
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
 
+//add view to page
 WCardsView.createField().appendTo('body');
-
 ```
