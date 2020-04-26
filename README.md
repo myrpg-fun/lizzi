@@ -13,7 +13,7 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * [Field Class](./docs/Field.md) - HTML UI link class
 * [Event Classes](./docs/Event.md) - new look at Events
 ### TODO Example
-`addCard.html`
+`app/addCard.html`
 ```html
 <!-- HTML template -->
 <div id="admin-card-add">
@@ -29,11 +29,12 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 </div>
 ```
 
-`addCard.js`
+`app/addCard.js`
 ```javascript
 const Field = require('lizzi/Field');
 const {Data} = require('lizzi');
 const Card = require('./card');
+const T = require('./template');
 
 /* Class for adding new card */
 class AddCard extends Data{
@@ -83,7 +84,7 @@ class AddCard extends Data{
 module.exports = AddCard;
 ```
 
-`card.html`
+`app/card.html`
 ```html
 <div id="admin-card">
     <div class="row">
@@ -97,10 +98,11 @@ module.exports = AddCard;
 </div>
 ```
 
-`card.js`
+`app/card.js`
 ```javascript
 const Field = require('lizzi/Field');
 const {Data} = require('lizzi');
+const T = require('./template');
 
 class Card extends Data{
     createField(){
@@ -146,7 +148,7 @@ class Card extends Data{
 module.exports = Card;
 ```
 
-`cards.html`
+`app/cards.html`
 ```html
 <div id="admin-cards">
     <div>
@@ -157,11 +159,12 @@ module.exports = Card;
 </div>
 ```
 
-`cards.js`
+`app/cards.js`
 ```javascript
 const Field = require('lizzi/Field');
 const {Data, Collection, CollectionFilter} = require('lizzi');
 const AddCard = require('./addCard');
+const T = require('./template');
 
 class Cards extends Collection{
     constructor(){
@@ -236,13 +239,24 @@ class CardsView extends Collection{
 module.exports = {Cards, CardsView};
 ```
 
-`index.js`
+`app/template.js`
+```javascript
+const {zzLoader} = require('lizzi/Field/Template');
+
+module.exports = new zzLoader('app');
+```
+
+`app/index.js`
 ```javascript
 const {Cards, CardsView} = require('./cards');
+const T = require('./template');
 
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
 
-//add view to page
-WCardsView.createField().appendTo('body');
+//When templates is loaded
+T.on('load', function(){
+    //add view to page
+    WCardsView.createField().appendTo('body');
+});
 ```
