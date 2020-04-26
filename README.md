@@ -55,8 +55,8 @@ class AddCard extends Data{
                     input.focus();
                 }, field);
             }.bind(this), function(field){
-                // when Field is removed, turn off focus event
-                this.off('focus', field);
+                // when Field is removed, turn off all events for this field 
+                this.off(field);
             }.bind(this))
             .click('.submit', function(){
                 // when we submit, clear all fields and add new Card to our cards collection
