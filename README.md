@@ -40,7 +40,7 @@ const T = require('./template');
 class AddCard extends Data{
     /* create new Field UI */
     createField(){
-        // clone #admin-card-add from template
+        // create Field using #admin-card-add from template
         return new Field(T.find('#admin-card-add'), this)
             // prevent submit event from <form>
             .preventSubmit('.add-form')
