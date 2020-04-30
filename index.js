@@ -220,10 +220,11 @@ class Collection extends zzSync{
     replace(data){
         !Array.isArray(data) && (data = [data]);
         
+        let last = this.__zzArray;
         this.__zzArray = data;
         
-        this.emit('replace-values', data, this);
-        this.emit('change-values', this.__zzArray, this);
+        this.emit('replace-values', data, last, this);
+        this.emit('change-values', data, this);
         
         return this;
     }

@@ -92,10 +92,10 @@ class zzTemplate{
     }
     
     remove(){
-        for (let i in this.__zzElements){
-            //if (this.__zzElements[i].parentNode){
-                this.__zzElements[i].parentNode.removeChild( this.__zzElements[i] );
-            //}
+        for (let el of this.__zzElements){
+            if (el.parentNode){
+                el.parentNode.removeChild( el );
+            }
         }
         return this;
     }
@@ -104,20 +104,35 @@ class zzTemplate{
         return new zzTemplate( this.__zzElements.map( el => el.cloneNode(true) ) );
     }
     
+    *[Symbol.iterator] () {
+        for (let el of this.__zzElements){
+            yield el;
+        }
+    }
+
+    toArray(){
+        return this.__zzElements;
+    }
+    
     constructor(template){
         !Array.isArray(template) && (template = [template]);
         
         Object.defineProperty(this, 'length', {
             get: () => this.__zzElements.length
         });
-        
+
         Object.defineProperty(this, 'elements', {
             get: () => this.__zzElements
         });
         
         this.__zzElements = [];
-        for (let i in template){
-            this.__zzElements = this.__zzElements.concat( this.__zzConvert( template[i] ) );
+        let index = 0;
+        for (let t of template){
+            let elements = this.__zzConvert( t );
+            for (let el of elements){
+                this[index++] = el;
+                this.__zzElements.push(el);
+            }
         }
     }
 }

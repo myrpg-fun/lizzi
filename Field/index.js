@@ -395,11 +395,7 @@ class Field extends Event{
     
     appendTo(DOMElement){
         if (!(DOMElement instanceof zzTemplate)){
-            if (typeof DOMElement === 'string'){
-                DOMElement = new zzTemplate(document).find(DOMElement);
-            }else{
-                DOMElement = new zzTemplate(DOMElement);
-            }
+            DOMElement = new zzTemplate(DOMElement);
         }
         
         if (DOMElement.length > 0){
@@ -487,10 +483,6 @@ class Field extends Event{
     }
 
     static addon(file){
-        if (typeof file === 'string'){
-            file = require(file);
-        }
-
         if (file && file.__zzFieldAddon){
             file = file.__zzFieldAddon;
 
@@ -502,8 +494,12 @@ class Field extends Event{
         }
     }
     
+    __initDOM(T){
+        this.DOM = new zzTemplate(T).childs().clone();
+    }
+    
     /* Create DOM Field */
-    constructor(zzTemplate, Data){
+    constructor(T, Data){
         super();
         
         this.__zzRemoveDOM = true;
@@ -512,7 +508,7 @@ class Field extends Event{
         
         this.events = [];
 
-        this.DOM = zzTemplate.clone().childs();
+        this.__initDOM(T);
     }
 }
 
