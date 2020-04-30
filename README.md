@@ -12,6 +12,7 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * [Reactive Classes](./docs/Lizzi.md) - Data, Collection classes
 * [Field Class](./docs/Field.md) - HTML UI link class
 * [Event Classes](./docs/Event.md) - new look at Events
+* [Router Classe](./docs/Router.md) - add routes to frontend app
 ### TODO Example
 `app/addCard.html`
 ```html
