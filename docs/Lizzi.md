@@ -137,6 +137,7 @@ console.log(elements.collection);
 ```
 
 `add-values`, `remove-values`, `replace-values` emit after add/replace/remove all variables in collection.
+`change-values` emit after add/replace/remove all variables in collection.
 * `values` is added/replaced/removed array of elements
 * `target` is this instance
 
