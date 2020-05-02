@@ -35,7 +35,8 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 const Field = require('lizzi/Field');
 const {Data} = require('lizzi');
 const Card = require('./card');
-const T = require('./template');
+/* use webpack html template inline loader plugin */
+const T = require('./addCard.html');
 
 /* Class for adding new card */
 class AddCard extends Data{
@@ -62,11 +63,11 @@ class AddCard extends Data{
                 this.off(field);
             }.bind(this))
             .click('.submit', function(){
+                this.collection.add(new Card(this));
+                
                 // when we submit, clear all fields and add new Card to our cards collection
                 this.todo = '';
                 this.emit('focus');
-                
-                this.collection.add(new Card(this));
             }.bind(this));
     }
     
@@ -103,7 +104,8 @@ module.exports = AddCard;
 ```javascript
 const Field = require('lizzi/Field');
 const {Data} = require('lizzi');
-const T = require('./template');
+/* use webpack html template inline loader plugin */
+const T = require('./card.html');
 
 class Card extends Data{
     createField(){
@@ -165,7 +167,8 @@ module.exports = Card;
 const Field = require('lizzi/Field');
 const {Data, Collection, CollectionFilter} = require('lizzi');
 const AddCard = require('./addCard');
-const T = require('./template');
+/* use webpack html template inline loader plugin */
+const T = require('./cards.html');
 
 class Cards extends Collection{
     constructor(){
@@ -240,24 +243,55 @@ class CardsView extends Collection{
 module.exports = {Cards, CardsView};
 ```
 
-`app/template.js`
-```javascript
-const {zzLoader} = require('lizzi/Field/Template');
-
-module.exports = new zzLoader('app');
-```
-
 `app/index.js`
 ```javascript
 const {Cards, CardsView} = require('./cards');
-const T = require('./template');
+const {MainApp} = require('../lizzi/Field/MainApp');
 
 const WCards = new Cards();
 const WCardsView = new CardsView(WCards);
 
-//When templates are loaded
-T.on('load', function(){
-    //add view to page
-    WCardsView.createField().appendTo('body');
-});
+class MyApp extends MainApp{
+    constructor(){
+        super();
+        
+        this.app = WCardsView.createField();
+    }
+};
+```
+
+`webpack.config.js`
+```javascript
+const path = require('path');
+const HTMLWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    context: path.resolve(__dirname, 'src'),
+    mode: 'development',
+    entry: {
+        main: './app/index.js'
+    },
+    output: {
+        filename: '[name].js',
+        path: path.resolve(__dirname, 'dist')
+    },
+    optimization: {
+        splitChunks:{
+            chunks: 'all'
+        }
+    },
+    plugins: [
+        new HTMLWebpackPlugin({
+            template: './assets/index.html'
+        })
+    ],
+    module:{
+        rules: [
+            {
+                test: /\.html/,
+                use: ['html-loader']
+            }
+        ]
+    }
+};
 ```
