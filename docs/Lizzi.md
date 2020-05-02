@@ -5,37 +5,37 @@
 let {Data, Collection, zzDataRef, CollectionFilter} = require('lizzi');
 ```
 
-## Class: Data
+# Class: Data
 _This class inherits from the [Event](./Event.md#class-event) class._
 
-### Methods
+## Methods
 
-#### Data.set({ name: value, ... }); 
+### Data.set({ name: value, ... }); 
 Register reactive variable **name** and set **value**.
 
 Registered variables emit `set`, `set:name` events on any changes.
 
-#### Data.unset(name);
+### Data.unset(name);
 Unregister and remove variable. Emit `remove-value`.
 
-#### Data.ref(name); 
+### Data.ref(name); 
 Get [zzDataRef](#class-zzdataref) by **name**.
 
-### Events
+## Events
 
-#### `set` {name, value, last, target} - emit if any variable changed
-#### `set:name` {name, value, last, target} -  emit if `name` variable changed
+### `set` {name, value, last, target} - emit if any variable changed
+### `set:name` {name, value, last, target} -  emit if `name` variable changed
 * **name** is name of variable
 * **value** is current value
 * **last** is old value
 * **target** is Data instance
 
-#### `remove-value` {name, value, target} - emit when value removed from reactive stack
+### `remove-value` {name, value, target} - emit when value removed from reactive stack
 * **name** is name of variable
 * **value** is last value of variable
 * **target** is Data instance
 
-### Examples
+## Examples
 
 ```javascript
 const data = new Data;
