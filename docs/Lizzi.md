@@ -1,20 +1,41 @@
 
-## Reactive Engine
+# Reactive Engine
 
 ```javascript
 let {Data, Collection, zzDataRef, CollectionFilter} = require('lizzi');
 ```
 
-### Class: Data
+## Class: Data
 _This class inherits from the [Event](./Event.md#class-event) class._
 
-`Data.set({ ... });` register reactive variable and set values.
+### Methods
 
-Events `set`, `set:name` emit on change any registered variable.
-* `name` is name of variable
-* `value` is current value
-* `last` is old value
-* `target` is Data instance
+#### Data.set({ name: value, ... }); 
+Register reactive variable **name** and set **value**.
+
+Registered variables emit `set`, `set:name` events on any changes.
+
+#### Data.unset(name);
+Unregister and remove variable. Emit `remove-value`.
+
+#### Data.ref(name); 
+Get [zzDataRef](#class-zzdataref) by **name**.
+
+### Events
+
+#### `set` {name, value, last, target} - emit if any variable changed
+#### `set:name` {name, value, last, target} -  emit if `name` variable changed
+* **name** is name of variable
+* **value** is current value
+* **last** is old value
+* **target** is Data instance
+
+#### `remove-value` {name, value, target} - emit when value removed from reactive stack
+* **name** is name of variable
+* **value** is last value of variable
+* **target** is Data instance
+
+### Examples
 
 ```javascript
 const data = new Data;
@@ -48,10 +69,6 @@ data.progress = 99;
 // Prints: 
 // progress: 10% -> 99%
 ```
-
-Event `set-values` emit one time after script ends.
-* `values` is changed values
-* `target` is Data instance
 
 ```javascript
 class userSettings extends Data{
@@ -88,13 +105,6 @@ this.downloadSpeed = 10;
 // lazy save values one time {uploadSpeed: 1000, downloadSpeed: 10, allowDownload: false}
 // changed only {uploadSpeed: 1000, downloadSpeed: 10}
 ```
-
-`Data.unset(name);` unregister and remove variable. Emit `remove-value`:
-* `name` is name of variable
-* `value` is last value of variable
-* `target` is Data instance
-
-`Data.ref(name);` get [zzDataRef](#class-zzdataref) by `name`.
 
 ### Class: Collection
 _This class inherits from the [Event](./Event.md#class-event) class._
