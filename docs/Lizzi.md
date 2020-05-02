@@ -21,17 +21,15 @@ Get [zzDataRef](#class-zzdataref) by **name**.
 
 ### Event: `set` {name, value, last, target} - emit if any variable changed
 ### Event: `set:name` {name, value, last, target} -  emit if `name` variable changed
-* **params**:
-* * **name** is name of variable
-* * **value** is current value
-* * **last** is old value
-* * **target** is Data instance
+* **params.name** is name of variable
+* **params.value** is current value
+* **params.last** is old value
+* **params.target** is Data instance
 
 ### Event: `remove-value` {name, value, target} - emit when value removed from reactive stack
-* **params**:
-* * **name** is name of variable
-* * **value** is last value of variable
-* * **target** is Data instance
+* **params.name** is name of variable
+* **params.value** is last value of variable
+* **params.target** is Data instance
 
 ## Examples
 
