@@ -10,7 +10,7 @@ Lizzi is reactive javascript library for Node.js and Web UI.
 * You can easily create any new UI elements. Like Color HTML UI element, Google Maps Marker etc. And get/set color or coordinates from it is class directly or through events.
 ### Manual
 * [Reactive Classes](./docs/Lizzi.md) - Data, Collection classes
-* [Field Class](./docs/Field.md) - HTML UI link class
+* [ViewContainer Class](./docs/View.md) - HTML UI link class
 * [Event Classes](./docs/Event.md) - new look at Events
 * [Router Classe](./docs/Router.md) - add routes to frontend app
 ### Examples
