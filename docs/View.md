@@ -1,5 +1,9 @@
 # Template Engine
 
+```javascript
+let {View, Loader} = require('lizzi/DOM');
+```
+
 ## Class: View
 ```javascript
     let {Collection, Data} = require('lizzi');
