@@ -98,7 +98,7 @@
         }, this)
         
         /* set route function to element */
-        .route('a', ['path', 'to', 'route'])
+        .route('a', ['path', 'to', data.ref('id')])
         .route('a', 'path/to/route'])
         
         /* set init and remove function */
