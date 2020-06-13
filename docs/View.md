@@ -36,9 +36,14 @@
         .data('.list', data.ref('data'), 'createFieldMethod')
         
         /* Add text reference to element. */
-        .text('.text', data.ref("string_variable"))
-        .text('.text', 'text string')
-        .text('.text', ['array of strings', data.ref("and"), data.ref("variables")])
+        .text('span', data.ref("string_variable"))
+        .text('span', 'text string')
+        .text('span', ['array of strings', data.ref("and"), data.ref("variables")])
+        
+        /* Add html reference to element. */
+        .html('div', data.ref("html_variable"))
+        .html('div', '<span></span>')
+        .html('div', ['<div>', data.ref("tag"), '</div>'])
         
         /* link reference to input/textarea element. */
         .input('.textarea', data.ref("any"))
@@ -52,11 +57,6 @@
         
         /* set text height to textarea */
         .autoResizeTextarea('.textarea')
-        
-        /* Add html reference to element. */
-        .text('.div', data.ref("html_variable"))
-        .text('.div', '<span></span>')
-        .text('.div', ['<div>', data.ref("tag"), '</div>'])
         
         /* Add switcher to element */
         .switch('.switch', data.ref("checkbox"))
