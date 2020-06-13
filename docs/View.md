@@ -2,7 +2,13 @@
 
 ## Class: View
 ```javascript
+    let {Collection, Data} = require('lizzi');
     let {Loader} = require('lizzi/DOM');
+    
+    //prepare data
+    let data = new Data({
+        //...
+    });
     
     //read template from file
     let T = Loader('<div id="template"> ... </div>');
@@ -18,16 +24,16 @@
         }, [...run_listener_with_this_arguments_when_Field_init])
         
         /* append Field to element */
-        .field('.element', data.ref('field'))
-        .field('.element', new Field)
+        .view('.element', data.ref('field'))
+        .view('.element', T.createView("...") )
         
         /* append Collection of Data to element */
         .collection('.list', new Collection, 'createFieldMethod')
         .collection('.list', data.ref('collection'), 'createFieldMethod')
         
         /* append Collection to element */
-        .fieldData('.list', new Data, 'createFieldMethod')
-        .fieldData('.list', data.ref('data'), 'createFieldMethod')
+        .data('.list', new Data, 'createFieldMethod')
+        .data('.list', data.ref('data'), 'createFieldMethod')
         
         /* Add text reference to element. */
         .text('.text', data.ref("string_variable"))
@@ -68,11 +74,15 @@
         
         /* add attribute reference to element */
         .attr('.element', 'style', data.ref("style"))
+        .attr('.element', {
+            'href': data.ref("href"),
+            'alt': [data.ref("alt"), ', but ', data.ref("altnot")]
+        })
         
         /* add css style reference to element */
         .style('.element', 'height', data.ref("height"))
         .style('.element', {
-            'height': data.ref("height"),
+            'height': [data.ref("height"), ' px'],
             'width': data.ref("width")
         })
         
