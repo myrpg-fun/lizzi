@@ -1,15 +1,14 @@
 # Template Engine
 
-## Class: Field
+## Class: View
 ```javascript
-    let Field = require('lizzi/Field');
-    let {zzTemplate} = require('lizzi/Field/Template');
+    let {Loader} = require('lizzi/DOM');
     
     //read template from file
-    let T = new zzTemplate('<div id="template"> ... </div>');
+    let T = Loader('<div id="template"> ... </div>');
 
     //Clone HTML DOM from template and add reactive logic.
-    let fView = new Field(T.find("#template"))
+    let fView = T.createView("#template")
         /* add event listener, and remove it when Field removed */
         .on(object, 'event-name', function(...eventArgs){
             //event listener, this = thisField
