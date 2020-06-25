@@ -1,182 +1,295 @@
-const path = require('path');
+const {Data} = require('../index');
 
 class Route{
-    run(routes){
-        let params = {};
-        for (let k in this.routes){
-            let r = this.routes[k];
-            if (r){
-                params[r.name] = routes[k].substring(r.index);
+    static trimPath(path){
+        return path.trim().replace(/[\/\\]+/g, '/').replace(/^\/+|\/+$/g, '');
+    }
+    
+    __match(regexp){
+        return regexp;
+    }
+    
+    __exact(regexp){
+        return '^'+regexp+'$';
+    }
+    
+    getRegexp(route){
+        let result = route.matchAll(/::|\\:|[:?](\w+)|\*\*|\*|[.()\\\/+{}^$?]|([^:.()\\\/+{}^$?*]+)/gmu);
+        
+        let regexp = '';
+        let params = [];
+        
+        for (let r of result){
+            if(r[1] !== undefined){
+                regexp += '([\\p{L}\\p{N}:+%_-]+)';
+                params.push(r[1]);
+            }else if(r[2] !== undefined){
+                regexp += r[2];
+            }else if (r[0] === '*'){
+                regexp += '[^./]+';
+            }else if (r[0] === '**'){
+                regexp += '.*';
+            }else{
+                regexp += '\\'+r[0];
             }
         }
         
-        this.fn.call(this.self, params);
+        return { params, 
+            regexp: new RegExp(this.__match(regexp), 'mu'), 
+            exact: new RegExp(this.__exact(regexp), 'mu') 
+        };
     }
     
-    __remapRoutes(name){
-        let i = name.indexOf(':');
-        if (i !== -1 && name.length > i+1){
-            return {
-                index: i,
-                name: name.substring(i+1)
-            };
-        }
+    async runMatch(route){
+        let exact = this.exact.test(route);
         
-        return null;
+        let match = route.match(this.regexp);
+        
+//        console.log(route, this.route, this.regexp, match, exact);
+        
+        if (match !== null){
+/*            if (!this.match){
+                //run one time
+                this.match = false;*/
+                let params = {};
+                for (let k in this.params){
+                    params[this.params[k]] = match[k*1+1];
+                }
+
+                if (typeof this.listener === 'function'){
+                    await this.listener.call(this.self, params, this);
+                }
+//            }
+        }/*else{
+            this.match = false;
+        }*/
+        
+        return exact;
     }
     
-    constructor(routes, fn, self){
-        this.routes = routes.map(this.__remapRoutes);
-        this.fn = fn;
+    runWildCard(){}
+    
+    add(route, listener, self){
+        return this.Router.add(this.route+'/'+route, listener, self);
+    }
+    
+    exactMatch(route, listener, self){
+        return this.Router.exactMatch(this.route+'/'+route, listener, self);
+    }
+    
+    noMatch(listener, self){
+        return this.Router.noMatch(listener, self);
+    }
+    
+    constructor(router, route, listener, self){
+        this.Router = router;
+        this.listener = listener;
         this.self = self;
+        this.route = Route.trimPath(route);
+//        this.match = false;
     }
 }
 
-class Router{
-    trimPath(path){
-        return path.trim().replace(/[\/\\]+/g, '/').replace(/^\/+|\/+$/g, '');
+class RouteFromStart extends Route{
+    __match(regexp){
+        return '^'+regexp;
+    }
+    
+    constructor(router, route, listener, self){
+        super(router, route, listener, self);
+        
+        let p = this.getRegexp(route);
+
+        this.regexp = p.regexp;
+        this.exact = p.exact;
+        this.params = p.params;
+    }
+}
+
+class RouteUntilEnd extends Route{
+    __match(regexp){
+        return regexp+'$';
+    }
+    
+    constructor(router, route, listener, self){
+        super(router, route, listener, self);
+        
+        let p = this.getRegexp(route);
+
+        this.regexp = p.regexp;
+        this.exact = p.exact;
+        this.params = p.params;
+    }
+}
+
+class RouteExactMatch extends Route{
+    __match(regexp){
+        return '^'+regexp+'$';
+    }
+    
+    constructor(router, route, listener, self){
+        super(router, route, listener, self);
+        
+        let p = this.getRegexp(route);
+
+        this.regexp = p.regexp;
+        this.exact = p.exact;
+        this.params = p.params;
+    }
+}
+
+class RouteNoMatch extends Route{
+    async runMatch(route){
+        return false;
+    }
+    
+    runWildCard(){
+        this.listener.call(this.self, this);
+    }
+    
+    constructor(router, listener, self){
+        super(router, '', listener, self);
+    }
+}
+
+class Router extends Data{
+    __zzAddRoute(newRoute){
+        this.routes.push(newRoute);
+
+        if (this.routeQueue.length === 0){
+            //start from last one
+            this.__zzOnRoute(this.routes.length - 1);
+        }
+        
+        return newRoute;
     }
 
-    __zzFindRoute(routes){
-        let cr = this.routes;
-        for (let name of routes){
-            if (cr.routes[name]){
-                cr = cr.routes[name];
-            }else{
-                //check :id
-                let find = false;
-                for (let i in cr.routes){
-                    let route = cr.routes[i];
+    exactMatch(route, fn, self){
+        return this.__zzAddRoute(
+            new RouteExactMatch(this, this.toUrl(route), fn, self)
+        );
+    }
+
+    add(route, fn, self){
+        if (typeof route === 'function'){
+            return this.__zzAddRoute(
+                new RouteNoMatch(this, route, fn)
+            );
+        }
+        
+        return this.__zzAddRoute(
+            new RouteFromStart(this, this.toUrl(route), fn, self)
+        );
+    }
+
+    until(route, fn, self){
+        return this.__zzAddRoute(
+            new RouteUntilEnd(this, this.toUrl(route), fn, self)
+        );
+    }
+
+    noMatch(fn, self){
+        return this.__zzAddRoute(
+            new RouteNoMatch(this, fn, self)
+        );
+    }
+
+    onChange(fn, self){
+        return this.on('change', fn, self);
+    }
+
+    async __zzRun(route, index){
+        for (let i = index; i < this.routes.length; i++){
+            this.isExact |= await this.routes[i].runMatch(route);
+        }
+        
+        if (!this.isExact){
+            //no exact path, run wildcard ways
+            for (let i = index; i < this.routes.length; i++){
+                await this.routes[i].runWildCard();
+            }
+        }
+    }
+
+    async __zzOnRoute(index){
+        index || (index = 0);
+        
+        let url = this.toUrl( decodeURI( window.location.pathname ) );
+        let idx = this.routeQueue.indexOf(url);
+        if (idx === -1){
+            this.routeQueue.push( url );
+        
+            if (this.routeQueue.length === 1){
+                do{
+                    this.isExact = false;
                     
-                    if (route.param && name.substring(0, route.name.length) === route.name){
-                        cr = cr.routes[name];
-                        find = true;
-                        break;
-                    }
-                }
-                
-                if (!find){
-                    return this.wc;
-                }
+                    this.path = '/'+this.routeQueue[0];
+                    
+                    this.emit('change', this.routeQueue[0]);
+                    
+                    await this.__zzRun( this.routeQueue[0], index );
+
+                    this.emit('after-change', this.routeQueue[0]);
+                    //always remove after run
+                    this.routeQueue.shift();
+                }while(this.routeQueue.length > 0);
             }
         }
-        
-        return cr;
-    }
-
-    __zzCreateRoute(routes){
-        let cr = this.routes;
-        for (let name of routes){
-            name = name.trim();
-            
-            let param = false;
-            let i = name.indexOf(/[:?*]/);
-            if (i !== -1){
-                name = name.substring(0, i);
-                param = true;
-            }
-            
-            if (cr.routes[name] === undefined){
-                cr.routes[name] = {
-                    name: name,
-                    param: param,
-                    routes: {},
-                    listeners: []
-                };
-            }
-            
-            cr = cr.routes[name];
-        }
-        
-        return cr;
-    }
-
-    __zzAddToRoute(route, routes, fn, self){
-        let r = new Route(routes, fn, self);
-        route.listeners.push(r);
-        
-        let routeArr = this.toRoute( window.location.pathname );
-        if (route === this.__zzFindRoute( routeArr )){
-            this.current = route;
-            
-            r.run( routeArr ); 
-        }
-    }
-
-    on(routes, fn, self){
-        routes = this.toRoute(routes);
-        
-        this.__zzAddToRoute( this.__zzCreateRoute(routes), routes, fn, self );
-        
-        return this;
-    }
-
-    wildcard(fn, self){
-        this.__zzAddToRoute( this.wc, [], fn, self );
-        
-        return this;
-    }
-
-    __zzOnRoute(event){
-        let routeArr = this.toRoute( window.location.pathname );
-        let route = this.__zzFindRoute( routeArr );
-        
-        this.current = route;
-
-        for (let ev of route.listeners){
-            ev.run( routeArr );
-        }
-    }
-
-    toRoute(url){
-        if (typeof url === 'string'){
-            url = this.trimPath(url).split('/');
-        }
-        
-        if (Array.isArray(url)){
-            return url.map(u => u.trim()).filter(u => typeof u === 'string' && u !== '');
-        }
-        
-        return [];
     }
 
     toUrl(route){
         if (Array.isArray(route)){
-            route = route.join('/');
+            route = route.map(function(route){
+                if (route instanceof Route){
+                    route = route.route;
+                }
+                
+                if (typeof route === 'string'){
+                    return route;
+                }
+
+                return '';
+            }).join('/');
         }
         
         if (typeof route === 'string'){
-            return route;
+            return Route.trimPath( route );
         }
         
         return '';
     }
 
     go(url){
-        window.history.pushState({url: url}, '', this.toUrl(url));
+        this.state = {url: url};
+        window.history.pushState(this.state, '', '/'+this.toUrl(url));
+        this.__zzOnRoute();
     }
 
-    constructor(){        
-        this.routes = {
-            name: '',
-            param: false,
-            routes: {},
-            listeners: []
-        };
+    setState(object){
+        for (let name in object){
+            this.state[name] = object[name];
+        }
         
-        this.wc = {
-            name: '**',
-            param: false,
-            routes: {},
-            listeners: []
-        };
+        window.history.replaceState(this.state, '', window.location.href);
+    }
+
+    constructor(){
+        super({
+            path: null
+        });
         
-        this.current = null;
+        this.routes = [];
+        this.routeQueue = [];
+        this.isExact = false;
         
-        window.addEventListener('popstate', this.__zzOnRoute.bind(this));
-        let url = this.toUrl(window.location.pathname);
-        window.history.replaceState({url: window.location.href}, '', window.location.href);
-        this.__zzOnRoute();
+        window.addEventListener('popstate', (event) => {
+            this.state = event.state;
+            this.__zzOnRoute();
+        });
+        this.path = '/'+this.toUrl(window.location.pathname);
+        
+        this.state = {};
+        this.setState({url: window.location.pathname});
     }
 };
 

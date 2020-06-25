@@ -2,6 +2,8 @@ let {Event} = require('./event');
 let zzSync = require('./zzSync');
 let __zzSyncCounter = 0;
 
+
+
 class Sync extends Event{
     addSyncedClass(classTable){
         for (let name in classTable){

@@ -1,15 +1,18 @@
 /*
  * Docs https://github.com/myrpg-fun/lizzi
  */
+let {zzReference} = require('../zzReference');
 
 class EventStack{
-    removeAll(){
+    off(){
         let arr = this.events;
         
-        for (let l in arr){
-            if (arr[l] instanceof EventListener){
-                arr[l].off();
-            }
+        for (let args of arr){
+            let el = args[0];
+
+            let fn = el.off || el.removeEventListener || el.removeListener;
+
+            fn.apply(el, [].slice.call(args, 1));
         }
         
         this.events = [];
@@ -17,10 +20,21 @@ class EventStack{
         return this;
     }
     
-    add(events){
-        !Array.isArray(events) && (events = [events]);
+    add(/*...*/){
+        let el = arguments[0];
         
-        this.events = this.events.concat(events);
+        if (el instanceof EventListener){
+            this.events.push([el]);
+        }else if(el instanceof zzReference){
+            el.onSet(arguments[1], arguments[2]);
+            this.events.push(arguments);
+        }else{
+            let fn = el.on || el.addEventListener || el.addListener;
+
+            fn.apply(el, [].slice.call(arguments, 1));
+            
+            this.events.push(arguments);
+        }
         
         return this;
     }
@@ -29,6 +43,30 @@ class EventStack{
         this.events = [];
     }
 };
+
+class EventAvoid{
+    constructor(){
+        let run = false;
+        
+        this.set = (fn) => {
+            return function(){
+                run = true;
+                fn.apply(this, arguments);
+                run = false;
+            };
+        };
+        
+        this.check = (fn) => {
+            return function(){
+                if (run){
+                    return;
+                }
+                
+                fn.apply(this, arguments);
+            };
+        };
+    }
+}
 
 class EventsGroup{
     add(listener, once, prepend){
@@ -145,7 +183,7 @@ class EventListener{
     
     run(argsArray){
         if (this.isCalled){
-            return;
+            return this;
         }
         
         this.isCalled = true;
@@ -157,7 +195,7 @@ class EventListener{
     
     call(){
         if (this.isCalled){
-            return;
+            return this;
         }
         
         this.isCalled = true;
@@ -167,12 +205,18 @@ class EventListener{
         return this;
     }
     
-    addToStack(stack){
+    /*
+     * Add listener to EventStack
+     * 
+     * @param {type} stack
+     * @returns {nm$_Event.EventListener}
+     */    
+    add(stack){
         stack.add(this);
         
         return this;
     }
-    
+
     __zzAddGroup(group){
         if (group instanceof EventsGroup){
             this.group.push(group);
@@ -369,4 +413,4 @@ function EventAfterAll(fn){
     };
 }
 
-module.exports = {EventStack, EventListener, EventsGroup, EventAfterAll, Event};
+module.exports = {EventStack, EventListener, EventsGroup, EventAfterAll, Event, EventAvoid};

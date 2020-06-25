@@ -2,60 +2,10 @@
  * Docs https://github.com/myrpg-fun/lizzi
  */
 
-let {Event} = require('./event');
-const zzSync = require('./zzSync');
+let {zzDataRef} = require('./zzReference');
+let {Event} = require('./Event');
 
-class zzDataRef{
-    onSet(fn, self){
-        return this.model.on('set:'+this.name, fn, self);
-    }
-    
-    off(fn, self){
-        this.model.off('set:'+this.name, fn, self);
-    }
-
-    __init(model, name){
-        this.model = model;
-        this.name = name;
-        this.events = [];
-        
-        Object.defineProperty(this, 'value', {
-            get: () => this.model[this.name],
-            set: (value) => this.model[this.name] = value
-        });
-        
-    }
-    
-    constructor(model, name){
-        this.__init(model, name);
-    }
-}
-
-class Data extends zzSync{
-    __zzSerialize(){
-        return this.values();
-    }
-    
-    __zzGetSyncedEvents(){
-        return ['set', 'remove-value'];
-    }
-    
-    __zzEmitAfterSet(name, value){
-        if (this.__zzAfterEmitValues === null){
-            setTimeout(() => {
-                this.emit('set-values', {
-                    values: this.__zzAfterEmitValues, target: this
-                });
-                
-                this.__zzAfterEmitValues = null;
-            }, 0);
-            
-            this.__zzAfterEmitValues = {};
-        }
-        
-        this.__zzAfterEmitValues[name] = value;
-    }
-    
+class Data extends Event{
     __zzSet(name, value){
         var last = this.__zzValues[name];
         if (last !== value){
@@ -66,7 +16,6 @@ class Data extends zzSync{
             this.emit('set:'+name, {
                 name: name, value: value, last: last, target: this
             });
-//            this.__zzEmitAfterSet(name, value);
         }
     }
     
@@ -75,10 +24,14 @@ class Data extends zzSync{
     }
     
     set(values){
+        if (values instanceof Data){
+            values = values.values();
+        }
+        
         let last = {};
         //set all values
         for (let name in values){
-            if (!(name in this.__zzValues)){
+            if (!(name in this.__zzValues) && name !== '__zzValues'){
                 Object.defineProperty(this, name, {
                     get: () => this.__zzValues[name],
                     set: this.__zzSet.bind(this, name)
@@ -99,7 +52,6 @@ class Data extends zzSync{
                 this.emit('set:'+name, {
                     name: name, value: value, last: last[name], target: this
                 });
-//                this.__zzEmitAfterSet(name, value);
             }
         }
         
@@ -130,33 +82,35 @@ class Data extends zzSync{
         !data && (data = {});
         
         this.__zzValues = {};
-        this.__zzAfterEmitValues = null;
         
         this.set(data);
     }
 }
 
-class Collection extends zzSync{
-    __zzSerialize(){
-        return this.elements;
-    }
-    
-    __zzGetSyncedEvents(){
-        return ['change-values'];
-    }
-    
-    add(data){
+class Collection extends Event{
+    add(data, idx){
+        idx === undefined && (idx = this.__zzArray.length);
         !Array.isArray(data) && (data = [data]);
         
-        data.forEach(function(val){
-            this.__zzArray.push(val);
-            this.emit('add', val, this.__zzArray.length-1, this);
-        }, this);
+        return this.splice(idx, 0, ...data);
+    }
+    
+    addBefore(element, data){
+        let idx = this.indexOf(element);
+        if (idx === -1){
+            return this;
+        }
         
-        this.emit('add-values', data, this);
-        this.emit('change-values', this.__zzArray, this);
+        return this.add(data, idx);
+    }
+    
+    addAfter(element, data){
+        let idx = this.indexOf(element);
+        if (idx === -1){
+            return this;
+        }
         
-        return this;
+        return this.add(data, idx+1);
     }
     
     removeAll(){
@@ -165,7 +119,7 @@ class Collection extends zzSync{
         this.__zzArray = [];
         
         all.forEach(function(val, idx){
-            this.emit('remove', val, idx, this);
+            this.emit('remove', val, 0, this);
         }, this);
         
         this.emit('remove-values', all, this);
@@ -175,10 +129,26 @@ class Collection extends zzSync{
     }
     
     splice(index, count){
-        let val = this.__zzArray.splice(index, count);
-        for (let i in val){
-            this.emit('remove', val[i], index*1+i*1, this);
+        let newData = [].slice.call(arguments, 2);
+        let removeData = this.__zzArray.splice(index, count, ...newData);
+        
+        if (count > 0){
+            for (let i in removeData){
+                this.emit('remove', removeData[i], Number(index)+Number(i), this);
+            }
+        
+            this.emit('remove-values', removeData, this);
         }
+
+        if (newData.length > 0){
+            newData.forEach((val, i) => {
+                this.emit('add', val, i+index, this);
+            });
+
+            this.emit('add-values', newData, index, this);
+        }
+        
+        this.emit('change-values', this.__zzArray, this);
     }
     
     remove(data){
@@ -217,6 +187,10 @@ class Collection extends zzSync{
         return this.__zzArray.indexOf(val);
     }
     
+    has(val){
+        return this.__zzArray.indexOf(val) !== -1;
+    }
+    
     replace(data){
         !Array.isArray(data) && (data = [data]);
         
@@ -229,6 +203,10 @@ class Collection extends zzSync{
         return this;
     }
     
+    refresh(){
+        this.emit('change-values', this.__zzArray, this);
+    }
+    
     async forEach(fn, self){
         for (let i in this.__zzArray){
             let result = fn.call(self, this.__zzArray[i], i, this.__zzArray);
@@ -238,14 +216,14 @@ class Collection extends zzSync{
         }
     }
     
-    initSyncEvents(){
-        this.on('sync:watch', function(sync){
-            this.elements.forEach(e => sync.watch(e));
-        }, this);
-        
-        this.on('sync:unwatch', function(sync){
-            this.elements.forEach(e => sync.unwatch(e));
-        }, this);
+    *[Symbol.iterator]() {
+        for (let el of this.__zzArray){
+            yield el;
+        }
+    }
+
+    toArray(){
+        return this.__zzArray;
     }
     
     constructor(array){
@@ -261,25 +239,13 @@ class Collection extends zzSync{
             get: () => this.__zzArray.slice()
         });
         
-        this.initSyncEvents();
-        
         if (array){
             this.add(array);
         }
     }
 }
 
-/*
- * Collection filter used for sort and filter elements in Collections
- * 
- * @param {Collection} collection - inner collection
- * 
- * use: new CFilter(innerCollection)
- *          .setFilterFn(filterFunction)
- *          .to(outerCollection);
- */
-
-class CollectionFilter extends Event{
+class LazyCollection extends Event{
     /*
      * filter/sort class
      * 
@@ -290,26 +256,18 @@ class CollectionFilter extends Event{
         return elements;
     }
     
-    setFilterFn(fn){
+    setFilter(fn){
         if (typeof fn === 'function'){
             this.__zzFilterFn = fn;
             this.refresh();
         }
         return this;
     }
-    
+
     refresh(){
-        this.emit('change', this.__zzFilterFn(this.collection.elements));
-    }
-    
-    __zzSendChanges(collection, elements){
-        if (!Array.isArray(elements)){
-            console.error('CollectionFilter filter function returns not array');
-            
-            return;
-        }
-        
-        collection.replace(elements);
+        this.__zzNeedUpdate = true;
+        this.emit('replace-values', this, this.__zzArray.slice(), this);
+        this.emit('change-values', this, this);
     }
     
     /*
@@ -318,31 +276,55 @@ class CollectionFilter extends Event{
      * @param {zzFCollection} collection - outer collection
      */
     to(collection){
-        this.on('change', this.__zzSendChanges.bind(this, collection), collection);
+        this.on('change-values', () => collection.replace(this.elements), collection);
         
-        //setup current elements
-        this.__zzSendChanges(collection, this.__zzFilterFn(this.collection.elements));
+        collection.replace(this.elements);
         
         return this;
     }
     
-    off(collection){
-        if (collection){
-            this.off(collection);
-        }else{
-            this.collection.off(this);
+    toArray(){
+        if (this.__zzNeedUpdate){
+            this.__zzArray = this.__zzFilterFn(this.collection.elements);
+            this.__zzNeedUpdate = false;
+        };
+        
+        return this.__zzArray;
+    }
+    
+    async forEach(fn, self){
+        for (let i in this.toArray()){
+            let result = fn.call(self, this.__zzArray[i], i, this.__zzArray);
+            if (result instanceof Promise){
+                await result;
+            }
         }
-        return this;
+    }
+    
+    *[Symbol.iterator]() {
+        for (let el of this.toArray()){
+            yield el;
+        }
     }
     
     constructor(collection){
         super();
         
         this.collection = collection;
-        this.collection.on(['add-values', 'remove-values', 'replace-values'], this.refresh, this);
+        this.collection.on('change-values', this.refresh, this);
         
         this.__zzFilterFn = this.filter;
+        this.__zzArray = [];
+        this.__zzNeedUpdate = true;
+        
+        Object.defineProperty(this, 'length', {
+            get: () => this.toArray().length
+        });
+        
+        Object.defineProperty(this, 'elements', {
+            get: () => this.toArray().slice()
+        });
     }
 }
 
-module.exports = {zzDataRef, Data, Collection, CollectionFilter};
+module.exports = {Data, Collection, LazyCollection};

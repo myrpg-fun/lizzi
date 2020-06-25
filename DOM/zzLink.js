@@ -1,22 +1,27 @@
 class zzLink{
     addEvents(Field){}
     clearEvents(Field){}
+    linkToView(Field){}
 }
 
 class zzLinkFind extends zzLink{
     addEvents(Field){
-        var els = Field.find(this.find).elements;
-        for (let i in els){
-            this.addEventToEL(els[i], Field);
+        for (let els of this.elements){
+            this.addEventToEL(els, Field);
         }
     }
     
     clearEvents(Field){}
 
+    linkToView(Field){
+        this.elements = Field.find(this.find).elements;
+    }
+    
     constructor(selector){
         super();
         
         this.find = selector;
+        this.elements = [];
     }
 }
 
