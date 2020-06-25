@@ -1,60 +1,36 @@
 ## TO DO Example
 
-`app/addCard.html`
+`app/addtodo.html`
 ```html
 <!-- HTML template -->
-<div id="admin-card-add">
+<template id="todo-add">
     <form class="add-form">
-        <div class="header">TO DO...</div>
-        <div class="option">
-            <input type="text" class="todo" placeholder="TO DO">
-        </div>
-        <div class="margin-add-button">
-            <button type="submit" class="submit">Add new task</button>
+        <h4 class="card-title">What I want to do?</h4>
+        <div class="add-items d-flex"> 
+            <input type="text" class="form-control todo-list-input todo" placeholder="What I want to do?"> 
+            <button class="add btn btn-primary font-weight-bold todo-list-add-btn submit">Add</button> 
         </div>
     </form>
-</div>
+</template>
 ```
 
-`app/addCard.js`
+`app/addtodo.js`
 ```javascript
-const Field = require('lizzi/Field');
-const {Data} = require('lizzi');
-const Card = require('./card');
-/* use webpack html template inline loader plugin */
-const T = require('./addCard.html');
+import {Data, Collection, LazyCollection} from 'lizzi';
+import {TodoCard} from './todocard';
 
-/* Class for adding new card */
-class AddCard extends Data{
-    /* create new Field UI */
-    createField(){
-        // create Field using #admin-card-add from template
-        return new Field(T.find('#admin-card-add'), this)
-            // prevent submit event from <form>
+import {Loader} from 'lizzi/DOM';
+const T = Loader( require('./addtodo.html') );
+
+export class AddTodo extends Data{
+    createView(){
+        return T.createView('#todo-add', this)
             .preventSubmit('.add-form')
-            // link this.todo variable with input.todo
             .input('input.todo', this.ref('todo'))
-            .init(function(field){
-                // when Field created, add focus event
-                this.on('focus', function(){
-                    // find input in field
-                    let input = field.find('input.todo');
-                    // get finded input DOMElement from Template
-                    input = input.elements[0];
-                    // focus
-                    input.focus();
-                }, field);
-            }.bind(this), function(field){
-                // when Field is removed, turn off all events for this field 
-                this.off(field);
-            }.bind(this))
-            .click('.submit', function(){
-                this.collection.add(new Card(this));
-                
-                // when we submit, clear all fields and add new Card to our cards collection
+            .click('.submit', () => {
+                this.collection.add( new TodoCard(this) );
                 this.todo = '';
-                this.emit('focus');
-            }.bind(this));
+            });
     }
     
     constructor(collection){
@@ -62,130 +38,72 @@ class AddCard extends Data{
         
         this.collection = collection;
         
-        // initialize reactive variables
         this.set({
             todo: ''
         });
     }
-}
-
-module.exports = AddCard;
+};
 ```
 
-`app/card.html`
+`app/filter.html`
 ```html
-<div id="admin-card">
-    <div class="row">
-        <div class="id"></div>
-        <div class="todo"></div>
-        <div class="checkbox done">
-            <span class="opt-checkbox"></span> Done
-        </div>
-        <div class="remove">X</div>
-    </div>
-</div>
+<template id="no-todo-cards">
+    <li>
+        <h6> 
+            Nothing TO DO...
+        </h6>
+    </li>
+</template>
+
+<template id="not-found-todo-cards">
+    <li>
+        <h6> 
+            Nothing found...
+        </h6>
+    </li>
+</template>
 ```
 
-`app/card.js`
+`app/filter.js`
 ```javascript
-const Field = require('lizzi/Field');
-const {Data} = require('lizzi');
-/* use webpack html template inline loader plugin */
-const T = require('./card.html');
+import {Data, LazyCollection} from 'lizzi';
 
-class Card extends Data{
-    createField(){
-        return new Field(T.find('#admin-card'), this)
-            //when index set, then change text in .id element (draw 1. 2. 3. etc)
-            .text('.id', [this.ref('index'), '.'])
-            //if we click on remove element, then emit 'admin:remove'
-            .click('.remove', () => this.emit('admin:remove') )
-            //switch this.done by click on .done element
-            //adds 'on' to class .done element when this.done is true
-            //adds 'off' to class .done element when this.done is false
-            .switch('.done', this.ref('done'))
-            //add to .row element class value from doneClass
-            .class('.row', this.ref('doneClass'))
-            .text('.todo', this.ref('todo'));
-    }
-    
-    constructor(data){
-        super(data);
-        
-        //set and make todo value reactive
-        this.set({
-            todo: data.todo || ''
-        });
+import {Loader} from 'lizzi/DOM';
+const T = Loader( require('./filter.html') );
 
-        //set and make index, doneClass and done values reactive
-        this.set({
-            index: 0,
-            doneClass: '',
-            done: false
-        });
-        
-        //when done is true, then add to done class 'line-through'
-        //when done is false, then do empty done class
-        this.on('set:done', e => this.doneClass = this.done?'line-through':'', this)
-            //run listener function instanly with empty arguments
-            .run();
-        //when todo or done changed, then current class emit 'admin:change' event
-        this.on(['set:todo', 'set:done'], () => this.emit('admin:change'), this);
-    }
-}
-
-module.exports = Card;
-```
-
-`app/cards.html`
-```html
-<div id="admin-cards">
-    <div>
-        <input type="text" class="search" placeholder="Search tasks">
-    </div>
-    <div class="cards"></div>
-    <div class="add"></div>
-</div>
-```
-
-`app/cards.js`
-```javascript
-const Field = require('lizzi/Field');
-const {Data, Collection, CollectionFilter} = require('lizzi');
-const AddCard = require('./addCard');
-/* use webpack html template inline loader plugin */
-const T = require('./cards.html');
-
-class Cards extends Collection{
-    constructor(){
-        super();
-        
-        //when element added to Collection
-        this.on('add', function(data){
-            //link Card events to this class
-            data.on('admin:remove', function(){
-                this.remove(data);
-            }, this);
-        }, this);
-        
-        //when element removed from Collection
-        this.on('remove', function(data){
-            //remove all linked events
-            data.off(this);
-        }, this);
+class NoTodos extends Data{
+    createView(){
+        return T.createView('#no-todo-cards', this);
     }
 };
 
-class SearchFilter extends CollectionFilter{
+class NotFoundTodos extends Data{
+    createView(){
+        return T.createView('#not-found-todo-cards', this);
+    }
+};
+
+export class SearchFilter extends LazyCollection{
     filter(values){
-        //make index for all elements
-        values.forEach(v, i => v.index = i+1);
-    
-        //filter results
+        //if empty
+        if (values.length === 0){
+            return [
+                this.noToDos
+            ];
+        }
+        
+        values.forEach((v, i) => v.index = i+1);
+        
         if (this.searchRef.value){
-            //get value from reference searchRef
             let value = this.searchRef.value.toLowerCase();
-            return values.filter(d => d.todo.toLowerCase().indexOf(value) !== -1);
+            values = values.filter(d => d.todo.toLowerCase().indexOf(value) !== -1);
+            
+            //if not found
+            if (values.length === 0){
+                return [
+                    this.notFoundToDos
+                ];
+            }
         }
         
         return values;
@@ -195,55 +113,161 @@ class SearchFilter extends CollectionFilter{
         super(collection);
         
         this.searchRef = searchRef;
+        this.noToDos = new NoTodos();
+        this.notFoundToDos = new NotFoundTodos();
         
-        searchRef.onSet(this.refresh, this);
+        this.searchRef.onSet(this.refresh, this);
     }
-}
+};
+```
 
-class CardsView extends Collection{
-    createField(){
-        return new Field(T.find('#admin-cards'), this)
-            //append to .cards all fields created by Card.createField which are in this Collection
-            .collection('.cards', this, 'createField')
-            //append to .add field created by AddCard.createField
-            .fieldData('.add', this.addCard, 'createField')
-            //link input.search with DSearch.search variable
-            .input('.search', this.DSearch.ref('search'));
+`app/todo.html`
+```html
+<template id="todo-card">
+    <li>
+        <div class="form-check"> 
+            <label class="form-check-label"> 
+                <span class="id"></span> <input class="checkbox" type="checkbox"> <i class="input-helper"></i> <span class="todo"></span>
+            </label> 
+        </div> 
+        <i class="remove mdi mdi-close-circle-outline"></i>
+    </li>
+</template>
+
+<template id="todo">
+    <div class="page-content page-container" id="page-content">
+        <div class="row container d-flex justify-content-center">
+            <div class="col-lg-12">
+                <div class="card px-3">
+                    <div class="card-body">
+                        <h1>To do example...</h1>
+                        <div class="d-flex"> 
+                            <input type="text" class="form-control search" placeholder="Search tasks"> 
+                        </div>
+                        <div class="list-wrapper">
+                            <ul class="d-flex flex-column todo-list"></ul>
+                        </div>
+                        <div class="add"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+```
+
+`app/todo.js`
+```javascript
+//import './todo.css';
+
+import {Data, Collection} from 'lizzi';
+import {AddTodo} from './addtodo';
+import {SearchFilter} from './filter';
+import {TodoCard, TodoList} from './todocard';
+
+import {Loader} from 'lizzi/DOM';
+const T = Loader( require('./todo.html') );
+
+class TodoApp extends Data{
+    createView(){
+        return T.createView('#todo', this)
+            .collection('.todo-list', this.cards, 'createView')
+            .data('.add', this.addCard, 'createView')
+            .input('.search', this.ref('search'));
     }
     
     constructor(WCards){
-        super();
-        
-        this.WCardsCollection = WCards;        
-        this.addCard = new AddCard(WCards);
-        
-        this.DSearch = new Data({
+        super({
             search: ''
         });
         
-        //filter get array from WCards, filter with DSearch.search and replace results array to this Collection
-        new SearchFilter(WCards, this.DSearch.ref('search')).to(this);
+        this.addCard = new AddTodo(WCards);
+        
+        this.cards = new SearchFilter(WCards, this.ref('search'));
     }
 };
 
-module.exports = {Cards, CardsView};
+const TodoAppView = new TodoApp(new TodoList([
+    new TodoCard({todo: 'Make new game', done: true}),
+    new TodoCard({todo: 'Get profit'}),
+    new TodoCard({todo: 'Figure it out'})
+]));
+
+const MyApp = new MainApp({
+    title: 'To do App',
+    app: TodoAppView.createView()
+});
 ```
 
-`app/index.js`
+`app/todocard.html`
+```html
+<template id="todo-card">
+    <li>
+        <div class="form-check"> 
+            <label class="form-check-label"> 
+                <span class="id"></span> <input class="checkbox" type="checkbox"> <i class="input-helper"></i> <span class="todo"></span>
+            </label> 
+        </div> 
+        <i class="remove mdi mdi-close-circle-outline"></i>
+    </li>
+</template>
+
+```
+
+`app/todocard.js`
 ```javascript
-const {Cards, CardsView} = require('./cards');
-const {MainApp} = require('../lizzi/Field/MainApp');
+import {Data, Collection} from 'lizzi';
 
-const WCards = new Cards();
-const WCardsView = new CardsView(WCards);
+import {Loader} from 'lizzi/DOM';
+const T = Loader( require('./todocard.html') );
 
-class MyApp extends MainApp{
-    constructor(){
+export class TodoList extends Collection{
+    constructor(todos){
         super();
         
-        this.app = WCardsView.createField();
+        this.on('add', function(data){
+            data.on('todo:remove', function(){
+                this.remove(data);
+            }, this);
+        }, this);
+        
+        this.on('remove', function(data){
+            data.off(this);
+        }, this);
+        
+        this.add(todos);
     }
 };
+
+export class TodoCard extends Data{
+    createView(){
+        return T.createView('#todo-card', this)
+            .text('.id', [this.ref('index'), '.'])
+            .click('.remove', () => this.emit('todo:remove') )
+            .checkbox('.checkbox', this.ref('done'))
+            .class('li', this.ref('doneClass'))
+            .text('.todo', this.ref('todo'));
+    }
+    
+    constructor(data){
+        super();
+        
+        this.set({
+            todo: data.todo || '',
+            done: data.done || false
+        });
+
+        this.set({
+            index: 0,
+            doneClass: ''
+        });
+        
+        this.on('set:done', e => this.doneClass = this.done?'completed':'', this)
+            .run();
+    
+        this.on(['set:todo', 'set:done'], () => this.emit('todo:change'), this);
+    }
+}
 ```
 
 `webpack.config.js`
