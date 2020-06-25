@@ -121,6 +121,78 @@ export class SearchFilter extends LazyCollection{
 };
 ```
 
+
+`app/todocard.html`
+```html
+<template id="todo-card">
+    <li>
+        <div class="form-check"> 
+            <label class="form-check-label"> 
+                <span class="id"></span> <input class="checkbox" type="checkbox"> <i class="input-helper"></i> <span class="todo"></span>
+            </label> 
+        </div> 
+        <i class="remove mdi mdi-close-circle-outline"></i>
+    </li>
+</template>
+
+```
+
+`app/todocard.js`
+```javascript
+import {Data, Collection} from 'lizzi';
+
+import {Loader} from 'lizzi/DOM';
+const T = Loader( require('./todocard.html') );
+
+export class TodoList extends Collection{
+    constructor(todos){
+        super();
+        
+        this.on('add', function(data){
+            data.on('todo:remove', function(){
+                this.remove(data);
+            }, this);
+        }, this);
+        
+        this.on('remove', function(data){
+            data.off(this);
+        }, this);
+        
+        this.add(todos);
+    }
+};
+
+export class TodoCard extends Data{
+    createView(){
+        return T.createView('#todo-card', this)
+            .text('.id', [this.ref('index'), '.'])
+            .click('.remove', () => this.emit('todo:remove') )
+            .checkbox('.checkbox', this.ref('done'))
+            .class('li', this.ref('doneClass'))
+            .text('.todo', this.ref('todo'));
+    }
+    
+    constructor(data){
+        super();
+        
+        this.set({
+            todo: data.todo || '',
+            done: data.done || false
+        });
+
+        this.set({
+            index: 0,
+            doneClass: ''
+        });
+        
+        this.on('set:done', e => this.doneClass = this.done?'completed':'', this)
+            .run();
+    
+        this.on(['set:todo', 'set:done'], () => this.emit('todo:change'), this);
+    }
+}
+```
+
 `app/todo.html`
 ```html
 <template id="todo-card">
@@ -197,77 +269,6 @@ const MyApp = new MainApp({
     title: 'To do App',
     app: TodoAppView.createView()
 });
-```
-
-`app/todocard.html`
-```html
-<template id="todo-card">
-    <li>
-        <div class="form-check"> 
-            <label class="form-check-label"> 
-                <span class="id"></span> <input class="checkbox" type="checkbox"> <i class="input-helper"></i> <span class="todo"></span>
-            </label> 
-        </div> 
-        <i class="remove mdi mdi-close-circle-outline"></i>
-    </li>
-</template>
-
-```
-
-`app/todocard.js`
-```javascript
-import {Data, Collection} from 'lizzi';
-
-import {Loader} from 'lizzi/DOM';
-const T = Loader( require('./todocard.html') );
-
-export class TodoList extends Collection{
-    constructor(todos){
-        super();
-        
-        this.on('add', function(data){
-            data.on('todo:remove', function(){
-                this.remove(data);
-            }, this);
-        }, this);
-        
-        this.on('remove', function(data){
-            data.off(this);
-        }, this);
-        
-        this.add(todos);
-    }
-};
-
-export class TodoCard extends Data{
-    createView(){
-        return T.createView('#todo-card', this)
-            .text('.id', [this.ref('index'), '.'])
-            .click('.remove', () => this.emit('todo:remove') )
-            .checkbox('.checkbox', this.ref('done'))
-            .class('li', this.ref('doneClass'))
-            .text('.todo', this.ref('todo'));
-    }
-    
-    constructor(data){
-        super();
-        
-        this.set({
-            todo: data.todo || '',
-            done: data.done || false
-        });
-
-        this.set({
-            index: 0,
-            doneClass: ''
-        });
-        
-        this.on('set:done', e => this.doneClass = this.done?'completed':'', this)
-            .run();
-    
-        this.on(['set:todo', 'set:done'], () => this.emit('todo:change'), this);
-    }
-}
 ```
 
 `webpack.config.js`
