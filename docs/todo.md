@@ -279,7 +279,7 @@ module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './app/index.js'
+        main: './app/todo.js'
     },
     output: {
         filename: '[name].js',
