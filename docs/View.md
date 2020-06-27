@@ -15,7 +15,7 @@ let {View, Loader} = require('lizzi/DOM');
     });
     
     //read template from file
-    let T = Loader('<div id="template"> ... </div>');
+    let T = Loader('<template id="template"> ... </template>');
 
     //Clone HTML DOM from template and add reactive logic.
     let fView = T.createView("#template")
@@ -101,9 +101,22 @@ let {View, Loader} = require('lizzi/DOM');
             //...
         }, this)
         
-        /* set route function to element */
+        /* set route function by element href, and set elements href attribute */
         .route('a', ['path', 'to', data.ref('id')])
         .route('a', 'path/to/route'])
+        .route('a')
+        
+        /* set className to element if value equal attribute */
+        .select('a', data.ref('value'), 'className', 'attrName')
+        .select('a', Router.ref('path'), 'active', 'href')
+        
+        /* add to every element logic depends on data.values */
+        .elements('a', function(el, view){ /*...*/ }[, ...data.ref('values')])
+        .elements('a', function(el){ 
+            el.classList.remove('active');
+            if (Router.path === el.getAttribute('href'))
+                el.classList.add('active');
+        }, Router.ref('path'))
         
         /* set init and remove function */
         .init(function(thisField){
