@@ -116,10 +116,24 @@ connection.on('connected', function(socket) {
 ```
 ### Class: EventStack
 #### Add listeners to group
-`EventStack.add(eventListener[, run]);` add current _eventListener_ to group stack. And run it then with `run` array params.
+`EventStack.add(eventListener);` add current _eventListener_ to group stack. And run it then with `run` array params.
 
-`EventStack.add(model, listener[, self][, run]);` init _listener_ to _model_ and add to group stack. With `self` param. And run it then with `run` array params.
+`EventStack.add(model, listener[, self]);` init _listener_ to _model_ and add to group stack. With `self` param. And run it then with `run` array params.
 
 `EventStack.add(object, eventName, listener[, ...args]);` init _listener_ to _object_ (that have .on, .addListener, .addEventListener method) and add to group stack.
 
 `EventStack.off();` clear all added event listeners in stack, and clear stack.
+
+```javascript
+    this.ev = new EventStack();
+
+    this.ev.add( this.on('event', function(){/*...*/}, this) );
+    this.ev.add( this.ref('name'), function(){/*...*/}, this);
+    this.ev.add( window, 'resize', function(){/*...*/}, false);//add window.addEventListener('resize', function(){...}, false) to stack
+
+    //remove all listeners
+    this.ev.off();
+```
+
+### Function EventStack
+#### Add listeners to group
