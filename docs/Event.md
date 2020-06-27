@@ -112,10 +112,10 @@ connection.on('connected', function(socket) {
 `EventListener.run([...args]);` run current _eventListener_ with argument array.
 
 ```javascript
-    emitter.on('set:name', () => this.className = name, this).run();// Run listener after it initialize
+    // Run listener after it initialize
+    emitter.on('set:name', () => this.className = name, this).run();
 ```
 ### Class: EventStack
-#### Add listeners to group
 `EventStack.add(eventListener);` add current _eventListener_ to group stack. And run it then with `run` array params.
 
 `EventStack.add(model, listener[, self]);` init _listener_ to _model_ and add to group stack. With `self` param. And run it then with `run` array params.
@@ -127,13 +127,40 @@ connection.on('connected', function(socket) {
 ```javascript
     this.ev = new EventStack();
 
+    //add EventListener to stack
     this.ev.add( this.on('event', function(){/*...*/}, this) );
+    
+    //init this.ref('name').onSet(function(){...}, this) and add to stack
     this.ev.add( this.ref('name'), function(){/*...*/}, this);
-    this.ev.add( window, 'resize', function(){/*...*/}, false);//add window.addEventListener('resize', function(){...}, false) to stack
+
+    //init window.addEventListener('resize', function(){...}, false) and add to stack
+    this.ev.add( window, 'resize', function(){/*...*/}, false);
 
     //remove all listeners
     this.ev.off();
 ```
 
-### Function EventStack
-#### Add listeners to group
+### Function EventAfterAll
+`EventAfterAll(listener)` emit once _listener_ after many emits by timeout.
+
+```javascript
+    //run once listener after all 'set' events emit
+    data.on('set', EventAfterAll(function(){/*...*/}), this) );
+```
+
+### Class: EventAvoid
+`EventAvoid.avoid(listener)` call _listener_ in event, but avoid call _listener_ if it inside avoid function already.
+
+```javascript
+    let onReceive = new EventAvoid;
+    
+    //If new data received from server, avoid send data changes back
+    data.on('set', onReceive.avoid(() => {
+        socket.emit('data-change', data.values());
+    }), this);
+
+    //On receive new data from server, change data values
+    socket.on('data-change', onReceive.avoid(values => {
+        data.set(values);
+    }), this);
+```
