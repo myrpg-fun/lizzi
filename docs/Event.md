@@ -62,9 +62,11 @@ myEmitter.emit('event', 'x', 'y');
 #### Removing events
 `Event.off(eventListener);` removes current _eventListener_ from class.
 
-`Event.off(name or ...array[, listener][, self]);` find and remove all `name` event listeners from class filtered by `function` or by `self`.
+`Event.off(name or ...array[, listener][, self]);` find and remove all `name` event listeners from class filtered by `function` and/or by `self`.
 
-`Event.off([listener][, self]);` find and remove all specified event listeners from class by `function` or by `self`.
+`Event.off(listener[, self]);` find and remove all specified event listeners from class by `listener` function and by `self`.
+
+`Event.off(self);` find and remove all specified event listeners from class by `self`.
 
 #### Emitting event
 `Event.emit(name[, ...arguments]);` synchronously calls each of the listeners registered for the event named `name`, in the order they were registered, passing the supplied `arguments` to each.
@@ -103,11 +105,21 @@ connection.on('connected', function(socket) {
 #### Remove listener
 `EventListener.off();` removes current _eventListener_ from class.
 
-`EventListener.addToStack(eventStack);` add current  _eventListener_ to [EventStack](#class-eventstack).
+`EventListener.add(eventStack);` add current  _eventListener_ to [EventStack](#class-eventstack).
 
+`EventListener.call(...args);` run current _eventListener_ with arguments.
+
+`EventListener.run([...args]);` run current _eventListener_ with argument array.
+
+```javascript
+    emitter.on('set:name', () => this.className = name, this).run();// Run listener after it initialize
+```
 ### Class: EventStack
 #### Add listeners to group
-`EventStack.add([eventListener, ...]);` add current _eventListener_ to group stack.
+`EventStack.add(eventListener[, run]);` add current _eventListener_ to group stack. And run it then with `run` array params.
 
-#### Clear all listeners in group
-`EventStack.removeAll();` off all _eventListeners_ in group stack.
+`EventStack.add(model, listener[, self][, run]);` init _listener_ to _model_ and add to group stack. With `self` param. And run it then with `run` array params.
+
+`EventStack.add(object, eventName, listener[, ...args]);` init _listener_ to _object_ (that have .on, .addListener, .addEventListener method) and add to group stack.
+
+`EventStack.off();` clear all added event listeners in stack, and clear stack.
