@@ -29,7 +29,7 @@ myEmitter.emit('event', 'a', 'b');
 
 class OtherClass{
     whenEvent(a, b){
-        console.log(a, b, this, this === OtherClass);
+        console.log(a, b, this, this instanceof OtherClass);
     }
 
     constructor(Emitter){
