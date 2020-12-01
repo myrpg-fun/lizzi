@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
 let {Data, Collection} = require('./event');
 
 class SyncData extends Data{

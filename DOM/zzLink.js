@@ -1,28 +1,47 @@
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
 class zzLink{
-    addEvents(Field){}
-    clearEvents(Field){}
-    linkToView(Field){}
+    addEvents(view){}
+    clearEvents(view){}
+    linkToView(view){}
 }
 
 class zzLinkFind extends zzLink{
-    addEvents(Field){
+    addEvents(view){
         for (let els of this.elements){
-            this.addEventToEL(els, Field);
+            this.addEventToEL(els, view);
         }
     }
     
-    clearEvents(Field){}
+    clearEvents(view){}
 
-    linkToView(Field){
-        this.elements = Field.find(this.find).elements;
+    linkToView(view){
+        this.elements = view.find(this.selector).toArray();
     }
     
     constructor(selector){
         super();
         
-        this.find = selector;
+        this.selector = selector;
         this.elements = [];
     }
 }
 
-module.exports = {zzLink, zzLinkFind};
+class ViewElements{
+    addEventToEL(el, view){}
+
+    addEvents(elements, view){
+        for (let el of elements){
+            this.addEventToEL(el, view);
+        }
+    }
+    
+    clearEvents(elements, view){}
+    constructView(elements, view){}
+}
+
+module.exports = {zzLink, zzLinkFind, ViewElements};

@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
 let {Event} = require('../Event');
 
 class Sync extends Event{

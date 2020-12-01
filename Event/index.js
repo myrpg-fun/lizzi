@@ -1,124 +1,74 @@
-/*
- * Docs https://github.com/myrpg-fun/lizzi
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
  */
-let {zzReference} = require('../zzReference');
-
-class EventStack{
-    off(){
-        let arr = this.events;
-        
-        for (let args of arr){
-            let el = args[0];
-
-            let fn = el.off || el.removeEventListener || el.removeListener;
-
-            fn.apply(el, [].slice.call(args, 1));
-        }
-        
-        this.events = [];
-        
-        return this;
-    }
-    
-    add(/*...*/){
-        let el = arguments[0];
-        
-        if (el instanceof EventListener){
-            this.events.push([el]);
-        }else if(el instanceof zzReference){
-            el.onSet(arguments[1], arguments[2]);
-            this.events.push(arguments);
-        }else{
-            let fn = el.on || el.addEventListener || el.addListener;
-
-            fn.apply(el, [].slice.call(arguments, 1));
-            
-            this.events.push(arguments);
-        }
-        
-        return this;
-    }
-    
-    constructor(){
-        this.events = [];
-    }
-};
-
-class EventAvoid{
-    constructor(){
-        let run = false;
-        
-        this.set = (fn) => {
-            return function(){
-                run = true;
-                fn.apply(this, arguments);
-                run = false;
-            };
-        };
-        
-        this.check = (fn) => {
-            return function(){
-                if (run){
-                    return;
-                }
-                
-                fn.apply(this, arguments);
-            };
-        };
-    }
-}
 
 class EventsGroup{
     add(listener, once, prepend){
         let toGroup = once?this.once:this.many;
         
         if (listener instanceof EventListener){
+            this.self.emit('newListener', this.name, listener);
+
             if (prepend){
                 toGroup.unshift(listener);
             }else{
                 toGroup.push(listener);
             }
             
-            listener.__zzAddGroup(this);
+            //listener.__zzAddGroup(this);
         }
     }
     
     remove(listener){
         if (listener instanceof EventListener){
             let i = this.once.indexOf(listener);
-            (i !== -1) && this.once.splice(i, 1);
+            if (i !== -1){
+                this.self.emit('removeListener', this.name, this.once.splice(i, 1)[0]);
+            }
             
             i = this.many.indexOf(listener);
-            (i !== -1) && this.many.splice(i, 1);
+            if (i !== -1){
+                this.self.emit('removeListener', this.name, this.many.splice(i, 1)[0]);
+            }
         }
     }
     
     removeFn(fn){
-        let i = 0;
-        do{
-            i = this.many.findIndex(l => l.fn === fn, i);
-            (i !== -1) && this.many.splice(i, 1);
-        }while(i !== -1);
-        
-        i = 0;
-        do{
-            i = this.once.findIndex(l => l.fn === fn, i);
-            (i !== -1) && this.once.splice(i, 1);
-        }while(i !== -1);
+        this.many = this.many.filter(l => {
+            if (l.fn === fn){
+                this.self.emit('removeListener', this.name, l);
+                return false;
+            }
+            return true;
+        });
+
+        this.once = this.once.filter(l => {
+            if (l.fn === fn){
+                this.self.emit('removeListener', this.name, l);
+                return false;
+            }
+            return true;
+        });
     }
     
     removeBySelf(self){
-        let i = 0;
-        do{
-            i = this.many.findIndex(l => l.self === self, i);
-            (i !== -1) && this.many.splice(i, 1);
-        }while(i !== -1);
-        
-        i = 0;
-        do{
-            i = this.once.findIndex(l => l.self === self, i);
-            (i !== -1) && this.once.splice(i, 1);
-        }while(i !== -1);
+        this.many = this.many.filter(l => {
+            if (l.self === self){
+                this.self.emit('removeListener', this.name, l);
+                return false;
+            }
+            return true;
+        });
+
+        this.once = this.once.filter(l => {
+            if (l.self === self){
+                this.self.emit('removeListener', this.name, l);
+                return false;
+            }
+            return true;
+        });
     }
     
     removeAll(){
@@ -139,44 +89,35 @@ class EventsGroup{
         return this;
     }
     
-    enable(args){
-        if (Array.isArray(args)){
-            this.enabled = args;
-        }else{
-            this.enabled = false;
-        }
-    }
-    
-    isEnabled(){
-        return this.enabled !== false;
-    }
-    
     emit(argsArray){
         let events = this.many.slice(0);
-        for (let i in events){
-            events[i].run(argsArray);
+        for (let ev of events){
+            ev.run(argsArray);
         }
 
         events = this.once.slice(0);
-        for (let i in events){
-            events[i].run(argsArray);
+        for (let ev of events){
+            ev.run(argsArray);
+            this.self.emit('removeListener', this.name, ev);
         }
         this.once = [];
     }
+
+    listenerCount(){
+        return this.many.length + this.once.length;
+    }
     
-    constructor(name){
+    constructor(name, self){
         this.name = name;
         this.many = [];
         this.once = [];
-        this.enabled = false;
+        this.self = self;
     }
 }
 
 class EventListener{
     off(){
-        for (let group of this.group){
-            group.remove(this);
-        }
+        this.group.remove(this);
         
         return this;
     }
@@ -204,32 +145,13 @@ class EventListener{
         
         return this;
     }
-    
-    /*
-     * Add listener to EventStack
-     * 
-     * @param {type} stack
-     * @returns {nm$_Event.EventListener}
-     */    
-    add(stack){
-        stack.add(this);
-        
-        return this;
-    }
 
-    __zzAddGroup(group){
-        if (group instanceof EventsGroup){
-            this.group.push(group);
-        }
-        
-        return this;
-    }
-    
-    constructor(fn, self){
+    constructor(group, fn, self){
         this.fn = fn;
+
         this.self = self;
         this.isCalled = false;
-        this.group = [];
+        this.group = group;
     }
 }
 
@@ -243,39 +165,22 @@ class Event{
     }
     
     __zzCheckExistsEvent(name){
-        if (!this.__zzGetEvent(name)){
-            this.__zzEvents[name] = new EventsGroup(name);
+        if (!this.__zzEvents[name]){
+            this.__zzEvents[name] = new EventsGroup(name, this);
         }
         return this.__zzEvents[name];
     }
     
     __zzAddEventListener(name, fn, self, once, prepend){
-        !Array.isArray(name) && (name = [name]);
-        !self && (self = this);
-        !once && (once = false);
-        !prepend && (prepend = false);
+        self || (self = this);
+        once || (once = false);
+        prepend || (prepend = false);
 
-        let evListener;
-        if (fn instanceof EventListener){
-            evListener = fn;
-            self = evListener.self;
-            fn = evListener.fn;
-        }else{
-            evListener = new EventListener(fn, self);
-        }
+        let evGroup = this.__zzCheckExistsEvent(name);
+
+        let evListener = new EventListener(evGroup, fn, self);
         
-        for (let i in name){
-            let evGroup = this.__zzCheckExistsEvent(name[i]);
-
-            if (evGroup.isEnabled()){
-                fn.apply(self, evGroup.enabled);
-                if (!once){
-                    evGroup.add(evListener, once, prepend);
-                }
-            }else{
-                evGroup.add(evListener, once, prepend);
-            }
-        }
+        evGroup.add(evListener, once, prepend);
 
         return evListener;
     }
@@ -303,90 +208,125 @@ class Event{
      * @param {string} [fn] - event function
      * @param {string} [self] - event class object
      */
-    off(name, fn, self){
-        if (name instanceof EventListener){
-            name.off();
-            
-            return;
-        }
-        
-        !Array.isArray(name) && (name = [name]);
+    off(evName, fn, self){
         !fn && (fn = self);
 
-        for (let i in name){
-            let evName = name[i];
-            if (typeof evName === 'string'){
-                let evGroup = this.__zzGetEvent(evName);
+        if (typeof evName === 'string'){
+            let evGroup = this.__zzEvents[evName];
 
-                if (evGroup){
-                    if (typeof fn === 'function'){
-                        evGroup.removeFn(fn);
-                    }else{
-                        evGroup.removeBySelf(fn);
-                    }
+            if (evGroup){
+                if (typeof fn === 'function'){
+                    evGroup.removeFn(fn);
+                }else{
+                    evGroup.removeBySelf(fn);
+                }
+            }
+        }else{
+            let events = this.__zzEvents;
+            if (typeof evName === 'function'){
+                for (let eventName in events){
+                    events[eventName].removeFn(evName);
                 }
             }else{
-                let events = this.__zzGetEvents();
-                if (typeof evName === 'function'){
-                    for (let eventName in events){
-                        events[eventName].removeFn(evName);
-                    }
-                }else{
-                    for (let eventName in events){
-                        events[eventName].removeBySelf(evName);
-                    }
+                for (let eventName in events){
+                    events[eventName].removeBySelf(evName);
                 }
             }
         }
     }
     
+    listenerCount(name){
+        let group = this.__zzEvents[name];
+        return group?(group.listenerCount()):0;
+    }
+
     /**
      * Emit event
      *
      * @param   {string} name - key/index of the element in the list of jobs
      */
     emit(name){
-        let evGroup = this.__zzGetEvent(name);
+        let evGroup = this.__zzEvents[name];
         if (!evGroup){
             return false;
         }
         
-        evGroup.emit([].slice.call(arguments, 1));
+        evGroup.emit(Array.prototype.slice.call(arguments, 1));
         
         return true;
     }
-    
-    /**
-     * Enable event, if event enabled, all new listeners will call automatically
-     *
-     * @param   {string} name - key/index of the element in the list of jobs
-     */
-    enable(name){
-        let evGroup = this.__zzCheckExistsEvent(name);
-        evGroup.enabled = [].slice.call(arguments);
         
-        this.emit.apply(this, evGroup.enabled);
-    }
-    
-    isEnabled(name){
-        let evGroup = this.__zzCheckExistsEvent(name);
-        return evGroup && evGroup.isEnabled();
-    }
-    
-    /**
-     * Disable enabled event
-     *
-     * @param   {string} name - key/index of the element in the list of jobs
-     */
-    disable(name){
-        let evGroup = this.__zzCheckExistsEvent(name);
-        if (evGroup.isEnabled()){
-            evGroup.enabled = false;
+    /* Event helpers */
 
-            this.emit.apply(this, ['disable:'+name].concat([].slice.call(arguments, 1)));
+    /**
+     * Delay event run by time
+     * 
+     * @param {function} EventFunction
+     * @param {int} [Time = 0]
+     */
+    static Defer(fn, time){
+        var __zzAfterEmitValues = [];
+        time || (time = 0);
+        let timer = null;
+        let timeoutfn = () => {
+            fn.call(this, __zzAfterEmitValues);
+
+            __zzAfterEmitValues = [];
+        };
+
+        return function(){
+            if (__zzAfterEmitValues.length === 0){
+                clearTimeout(timer);
+                timer = setTimeout(timeoutfn, time);
+    
+                __zzAfterEmitValues.push([].slice(arguments));
+            }
+        };
+    }
+
+    static AvoidRunner(){
+        return new EventAvoidRunner;
+    }
+
+    /**
+     * Make event, that avoid selfs
+     * 
+     * @param {function} EventFunction
+     * @param {...Event.AvoidRunner} AvoidRunners
+     */
+    static avoid(fn){
+        let targs = [].slice.call(arguments, 1);
+    
+        let args
+        for (let run of args){
+            if (!(run instanceof EventAvoidRun)){
+                console.error('Error: arguments of EventAvoid needs to be EventAvoidRun');
+            }
+        }
+
+        if (args.length < 1){
+            console.error('Error: Event.AvoidRunner\'s objects needs to be more than 1');
+        }
+
+        return function(){
+            for (let run of args){
+                if (run.r){
+                    return;
+                }
+            }
+    
+            for (let run of args){
+                run.r = true;
+            }
+    
+            fn.apply(this, arguments);
+    
+            for (let run of args){
+                run.r = false;
+            }
         }
     }
-    
+
     constructor(){
         this.__zzEvents = {};
 
@@ -397,20 +337,85 @@ class Event{
     }
 };
 
-function EventAfterAll(fn){
-    var __zzAfterEmitValues = [];
-    
-    return function(){
-        if (__zzAfterEmitValues.length === 0){
-            setTimeout(() => {
-                fn.call(this, __zzAfterEmitValues);
-
-                __zzAfterEmitValues = [];
-            }, 0);
-
-            __zzAfterEmitValues.push([].slice(arguments));
+class EventAvoidRunner{
+    run(fn){
+        if (this.r){
+            return;
         }
-    };
+        this.r = true;
+
+        fn.apply(this, Array.prototype.slice.call(arguments, 1));
+
+        this.r = false;
+    }
+    
+    constructor(){
+        this.r = false;
+    }
 }
 
-module.exports = {EventStack, EventListener, EventsGroup, EventAfterAll, Event, EventAvoid};
+class EventInStack{
+    run(args){
+        this.args[1].apply(this.element, args);
+
+        return this;
+    }
+
+    off(){
+        let el = this.element;
+
+        let off = (el.off || el.removeEventListener || el.removeListener);
+
+        off.apply(el, this.args);
+
+        return this;
+    }
+
+    constructor(element, args){
+        this.element = element;
+        this.args = args;
+
+        let on = (element.on || element.addEventListener || element.addListener);
+
+        on.apply(element, this.args);
+    }
+}
+
+class EventStack{
+    off(){
+        for (let el of this.events){
+            el.off();
+        }
+        
+        this.events = [];
+        
+        return this;
+    }
+    
+    add(/*...*/){
+        let el = arguments[0];
+        
+        if (el instanceof EventListener || el instanceof EventInStack){
+            this.events.push(el);
+            return el;
+        }else{
+            let ev = new EventInStack(el, [].slice.call(arguments, 1));
+            this.events.push(ev);
+            return ev;
+        }
+    }
+    
+    remove(el){
+        let i = this.events.indexOf(el);
+        if (i !== -1){
+            this.events[i].off();
+            this.events.splice(i, 1);
+        }
+    }
+
+    constructor(){
+        this.events = [];
+    }
+};
+
+module.exports = {EventListener, EventsGroup, Event, EventStack};

@@ -1,59 +1,51 @@
-const {zzLinkFind} = require('./zzLink');
-const {zzReference, zzArrayRef} = require('../zzReference');
-const {EventStack} = require('../Event');
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
+const {zzLinkFind, ViewElements} = require('./zzLink');
+const {zzReactive, zzStringConcat} = require('../index');
+const {Event} = require('../Event');
 const {Router} = require('../Router');
 
 class zzLinkPreventSubmit extends zzLinkFind{
-    addEventToEL(el){
-        this.ev.add(el, 'submit', function(event){
+    addEventToEL(el, view){
+        view.addEv(el, 'submit', function(event){
             event.preventDefault();
         }.bind(this), false);
-    }
-    
-    clearEvents(DOMel){
-        this.ev.off();
-    }
-
-    constructor(DOMFind){
-        super(DOMFind);
-        
-        this.ev = new EventStack;
     }
 }
 
 class zzLinkInputValue extends zzLinkFind{
-    addEventToEL(el){
-        this.ev
-            .add(this.modelRel, function(event){
-                if (el.value !== event.value){
-                    el.value = event.value;
+    addEventToEL(el, view){
+        view.addEv(this.modelRel, 'change', function(event){
+            if (el.value !== event.value){
+                el.value = event.value;
+            }
+        }, this);
+        
+        view.addEv(el, 'input', function(){
+            if (el.value !== this.modelRel.value){
+                let value = this.fnChange(el.value);
+                if (value !== undefined){
+                    this.modelRel.value = value;
                 }
-            }, this)
-            .add(el, 'input', function(){
-                if (el.value !== this.modelRel.value){
-                    let value = this.fnChange(el.value);
-                    if (value !== undefined){
-                        this.modelRel.value = value;
-                    }
-                }
-            }.bind(this), false)
-            .add(el, 'blur', function(){
-                if (el.value !== this.modelRel.value){
-                    el.value = this.modelRel.value;
-                }
-            }.bind(this), false);
+            }
+        }.bind(this), false);
+        
+        view.addEv(el, 'blur', function(){
+            if (el.value !== this.modelRel.value){
+                el.value = this.modelRel.value;
+            }
+        }.bind(this), false);
 
         el.value = this.modelRel.value;
-    }
-    
-    clearEvents(DOMel){
-        this.ev.off();
     }
 
     constructor(DOMFind, modelRel, fnChange){
         super(DOMFind);
         
-        this.ev = new EventStack;
         this.modelRel = modelRel;
         this.fnChange = fnChange?fnChange:(v) => v;
     }
@@ -61,21 +53,31 @@ class zzLinkInputValue extends zzLinkFind{
 
 class zzLinkAutoResizeTextarea extends zzLinkFind{
     delayedResize (text) {
-        setTimeout(() => {
-            text.style.height = 'auto';
-            text.style.height = text.scrollHeight+'px';
-        }, 0);
+        text.style.height = 'auto';
+        text.style.height = text.scrollHeight+'px';
     }
     
-    addEventToEL(text){
-        text.addEventListener('change',  this.delayedResize.bind(this, text), false);
-        text.addEventListener('input',  this.delayedResize.bind(this, text), false);
-        text.addEventListener('cut',  this.delayedResize.bind(this, text), false);
-        text.addEventListener('paste',  this.delayedResize.bind(this, text), false);
-        text.addEventListener('drop',  this.delayedResize.bind(this, text), false);
-        text.addEventListener('keydown',  this.delayedResize.bind(this, text), false);
+    addEventToEL(text, view){
+        var fn = Event.Defer(this.delayedResize.bind(this, text));
+        view.addEv(text, 'focus', fn, false);
+        view.addEv(text, 'change', fn, false);
+        view.addEv(text, 'input', fn, false);
+        view.addEv(text, 'cut', fn, false);
+        view.addEv(text, 'paste', fn, false);
+        view.addEv(text, 'drop', fn, false);
+        view.addEv(text, 'keydown', fn, false);
 
-        this.delayedResize(text);
+        if (this.modelRel){
+            view.addEv(this.modelRel, 'change', fn);
+        }
+
+        fn();
+    }
+
+    constructor(DOMFind, modelRel){
+        super(DOMFind);
+        
+        this.modelRel = modelRel;
     }
 };
 
@@ -90,7 +92,7 @@ class zzLinkTextValue extends zzLinkFind{
         }
         
         let DOMText = document.createTextNode('');
-        this.model.onSet( this.onModelSet.bind(this, DOMText, this.model), this );
+        this.model.change( this.onModelSet.bind(this, DOMText, this.model), this );
         this.onModelSet(DOMText, this.model);
 
         el.appendChild(DOMText);
@@ -109,7 +111,7 @@ class zzLinkTextValue extends zzLinkFind{
     constructor(DOMFind, modelRel, append){
         super(DOMFind);
         
-        this.model = new zzArrayRef(modelRel);
+        this.model = new zzStringConcat(modelRel);
         this.append = append?true:false;
         this.nodes = [];
     }
@@ -121,9 +123,9 @@ class zzLinkHtmlValue extends zzLinkFind{
     };
         
     addEventToEL(el){
-        this.model.onSet( this.onModelChange.bind(this, el, this.model), this );
+        this.model.change( this.onModelChange.bind(this, el, this.model), this );
         
-        this.onModelChange(el);
+        this.onModelChange(el, this.model);
     }
 
     clearEvents(){
@@ -133,7 +135,7 @@ class zzLinkHtmlValue extends zzLinkFind{
     constructor(DOMFind, modelRel){
         super(DOMFind);
         
-        this.model = new zzArrayRef(modelRel);
+        this.model = new zzStringConcat(modelRel);
     }
 }
 
@@ -153,7 +155,7 @@ class zzLinkSwitchValue extends zzLinkFind{
         el.className = cels.join(' ');
     }
     
-    addEventToEL(el){
+    addEventToEL(el, view){
         let onModelSet = function(ev){
             let s = this.sets.find(f => f.value === ev.last);
             if (s){
@@ -174,22 +176,17 @@ class zzLinkSwitchValue extends zzLinkFind{
             this.modelRel.value = this.skeys[k];
         }.bind(this);
         
-        this.ev.add(this.modelRel, onModelSet, this);
-        this.ev.add(el, 'click', onClick, false);
+        view.addEv(this.modelRel, 'change', onModelSet, this);
+        view.addEv(el, 'click', onClick, false);
 
         this.skeys.forEach(v => this.removeClass(el, this.sets[v]));
         
         onModelSet({last: null, value: this.modelRel.value});
     }
 
-    clearEvents(DOMel){
-        this.ev.off();
-    }
-
     constructor(DOMFind, modelRel, sets){
         super(DOMFind);
         
-        this.ev = new EventStack;
         this.modelRel = modelRel;
         this.sets = sets?sets:[
             {value: false, class: 'off'},
@@ -200,7 +197,7 @@ class zzLinkSwitchValue extends zzLinkFind{
 }
 
 class zzLinkCheckboxValue extends zzLinkFind{
-    addEventToEL(el){
+    addEventToEL(el, view){
         let onModelSet = function(ev){
             if (el.value !== 'on'){
                 el.checked = (ev.value === el.value);
@@ -217,20 +214,15 @@ class zzLinkCheckboxValue extends zzLinkFind{
             }
         }.bind(this);
         
-        this.ev.add(this.modelRel, onModelSet, this);
-        this.ev.add(el, 'click', onClick, false);
+        view.addEv(this.modelRel, 'change', onModelSet, this);
+        view.addEv(el, 'click', onClick, false);
 
         onModelSet({last: null, value: this.modelRel.value});
-    }
-
-    clearEvents(){
-        this.ev.off();
     }
 
     constructor(DOMFind, modelRel){
         super(DOMFind);
         
-        this.ev = new EventStack;
         this.modelRel = modelRel;
     }
 }
@@ -251,7 +243,7 @@ class zzLinkSelectValue extends zzLinkFind{
         el.className = cels.join(' ');
     }
     
-    addEventToEL(el){
+    addEventToEL(el, view){
         let onModelSet = function(ev){
             let value = el.getAttribute(this.attrName) || (el.dataset[this.attrName]);
             if (value){
@@ -276,41 +268,94 @@ class zzLinkSelectValue extends zzLinkFind{
             }
         }.bind(this);
         
-        this.ev.add(this.modelRel, onModelSet, this);
-        this.ev.add(el, 'click', onClick, false);
+        view.addEv(this.modelRel, 'change', onModelSet, this);
+        view.addEv(el, 'click', onClick, false);
 
         onModelSet({last: null, value: this.modelRel.value});
-    }
-
-    clearEvents(DOMel){
-        this.ev.off();
     }
 
     constructor(DOMFind, modelRel, className, attrName){
         super(DOMFind);
         
-        this.ev = new EventStack;
         this.modelRel = modelRel;
         this.className = className;
         this.attrName = attrName || 'value';
     }
 }
 
+class zzLinkElements extends zzLinkFind{
+    addEvents(view){
+        if (this.initFn){
+            if (this.initFn instanceof ViewElements){
+                this.initFn.addEvents(this.elements, view);
+            }else{
+                for (let els of this.elements){
+                    if (!(els instanceof HTMLElement)){
+                        continue;
+                    }
+            
+                    this.initFn(els, view);
+                }
+            }
+        }
+    }
+    
+    clearEvents(view){
+        if (this.initFn instanceof ViewElements){
+            this.initFn.clearEvents(this.elements, view);
+        }
+        
+        if (this.destroyFn){
+            for (let els of this.elements){
+                if (!(els instanceof HTMLElement)){
+                    continue;
+                }
+        
+                this.destroyFn(els, view);
+            }
+        }
+    }
+
+    linkToView(view){
+        super.linkToView(view);
+
+        if (this.initFn instanceof ViewElements){
+            this.initFn.constructView(this.selector, view);
+        }
+    }
+    
+    constructor(DOMFind, initFn, destroyFn){
+        super(DOMFind);
+        
+        this.initFn = initFn;
+        this.destroyFn = destroyFn;
+    }
+}
+
 class zzLinkAttributeValue extends zzLinkFind{
-    onModelChange(DOMAttr, model){
-        DOMAttr.value = model.value;
+    onModelChange(attr, model, el){
+        let value = model.value;
+        
+        if (!value && value !== ''){
+            el.removeAttribute(attr);
+        }else if(value === true){
+            el.setAttribute(attr, '');
+        }else{
+            el.setAttribute(attr, value);
+        }
     }
     
     setupAttr(attr, model, el){
-        var DOMAttr = document.createAttribute(attr);
-        el.setAttributeNode( DOMAttr );
+        model.change(this.onModelChange.bind(this, attr, model, el), this);
 
-        model.onSet(this.onModelChange.bind(this, DOMAttr, model), this);
-
-        this.onModelChange(DOMAttr, model);
+        this.onModelChange(attr, model, el);
     }
     
     addEventToEL(el){
+        if (!(el instanceof HTMLElement)){
+            return;
+        }
+
         for (let name in this.attr){
             this.setupAttr(name, this.attr[name], el);
         }
@@ -326,7 +371,9 @@ class zzLinkAttributeValue extends zzLinkFind{
         super(DOMFind);
 
         for (let name in attr){
-            attr[name] = new zzArrayRef(attr[name]);
+            if (!(attr[name] instanceof zzReactive)){
+                attr[name] = new zzStringConcat(attr[name]);
+            }
         }
         
         this.attr = attr;
@@ -339,7 +386,7 @@ class zzLinkStyleValue extends zzLinkAttributeValue{
     }
     
     setupAttr(style, model, el){
-        model.onSet(this.onModelChange.bind(this, el, style, model), this);
+        model.change(this.onModelChange.bind(this, el, style, model), this);
 
         this.onModelChange(el, style, model);
     }
@@ -347,6 +394,10 @@ class zzLinkStyleValue extends zzLinkAttributeValue{
 
 class zzLinkClassValue extends zzLinkFind{
     addEventToEL(el){
+        if (!(el instanceof HTMLElement)){
+            return;
+        }
+
         let listener = function(event){
             var cels = el.className.split(' ');
             
@@ -365,29 +416,35 @@ class zzLinkClassValue extends zzLinkFind{
             el.className = cels.join(' ').replace(/\s+/gmi,' ');
         };
 
-        this.modelRel.onSet( listener, this);
-        
-        listener({
-            last: null,
-            value: this.modelRel.value
-        });
+        if (this.modelRel instanceof zzReactive){
+            this.modelRel.change( listener, this);
+            
+            listener({
+                last: null,
+                value: this.modelRel.value
+            });
+        }else{
+            el.className += ' '+this.modelRel;
+        }
     }
 
     clearEvents(DOMel){
-        this.modelRel.off( this );
+        if (this.modelRel instanceof zzReactive){
+            this.modelRel.off( this );
+        }
     }
 
     constructor(DOMFind, modelRel){
         super(DOMFind);
         
-        this.modelRel = modelRel;
+        this.modelRel = new zzStringConcat(modelRel);
     }
 }
 
 class zzLinkClassObjectValue extends zzLinkFind{
     setupClass(className, model, el){
-        if (model instanceof zzReference){
-            let listener = function(event){
+        if (model instanceof zzReactive){
+            let listener = () => {
                 var cels = el.className.split(' ');
 
                 var remove = className.split(' ');
@@ -398,25 +455,29 @@ class zzLinkClassObjectValue extends zzLinkFind{
                     }            
                 }
 
-                if (event.value){
+                if (model.value){
                     cels.push(className);
                 }
 
                 el.className = cels.join(' ').replace(/\s+/gmi,' ');
             };
 
-            model.onSet( listener, this);
+            model.change( listener, this);
 
             listener({
                 last: null,
                 value: model.value
             });
-        }else if (typeof model === 'string'){
-            el.className += ' '+model;
+        }else if (model){
+            el.className += ' '+className;
         }
     }
     
     addEventToEL(el){
+        if (!(el instanceof HTMLElement)){
+            return;
+        }
+
         for (let name in this.classes){
             this.setupClass(name, this.classes[name], el);
         }
@@ -424,7 +485,7 @@ class zzLinkClassObjectValue extends zzLinkFind{
 
     clearEvents(field){
         for (let name in this.classes){
-            if (this.classes[name] instanceof zzReference){
+            if (this.classes[name] instanceof zzReactive){
                 this.classes[name].off( this );
             }
         }
@@ -438,20 +499,15 @@ class zzLinkClassObjectValue extends zzLinkFind{
 }
 
 class zzLinkClick extends zzLinkFind{
-    addEventToEL(el, DOMfield){
-        this.ev.add(el, 'click', this.fn.bind(this.self?this.self:DOMfield, el, DOMfield));
+    addEventToEL(el, view){
+        view.addEv(el, 'click', this.fn.bind(this.self?this.self:view, el, view));
     }
 
-    clearEvents(DOMel){
-        this.ev.off();
-    }
-    
     constructor(DOMFind, fn, self){
         super(DOMFind);
         
         this.fn = fn;
         this.self = self;
-        this.ev = new EventStack;
     }
 }
 
@@ -459,42 +515,51 @@ class zzLinkIf extends zzLinkFind{
     addEventToEL(el){
         let DOMEmpty = document.createTextNode('');
         el.parentNode.insertBefore(DOMEmpty, el);
-        
-        let listener = function(event){
-            let visible = Boolean(event.value);
-            if (Boolean(event.last) !== visible){
+
+        let last = 1;
+        let listener = () => {
+            let visible = Boolean(this.modelRel.value) ^ this.inverse;
+            if (last !== visible){
                 if (visible){
                     DOMEmpty.parentNode.insertBefore(el, DOMEmpty);
                 }else{
                     el.remove();
                 }
+
+                last = visible;
             }
         };
 
-        this.modelRel.onSet( listener, this);
+        this.modelRel.change( listener, this);
         
-        listener({
-            last: true,
-            value: this.modelRel.value
+        listener();
+        
+        this.nodes.push({
+            text: DOMEmpty,
+            el: el
         });
-        
-        this.nodes.push(DOMEmpty);
     }
 
     clearEvents(DOMel){
         this.modelRel.off( this );
         
         for (let node of this.nodes){
-            node.parentNode.removeChild(node);
+            node.text.parentNode.insertBefore(node.el, node.text);
+            node.text.parentNode.removeChild(node.text);
         }
         this.nodes = [];
     }
 
-    constructor(DOMFind, modelRel){
+    constructor(DOMFind, modelRel, inverse){
         super(DOMFind);
+
+        if (!(modelRel instanceof zzReactive)){
+            console.error('Error: condition is not zzReactive');
+        }
         
         this.modelRel = modelRel;
         this.nodes = [];
+        this.inverse = inverse || false;
     }
 }
 
@@ -503,50 +568,35 @@ class zzLinkRoute extends zzLinkFind{
         return '/'+(Array.isArray(v)?v.join('/'):v);
     }
     
-    addEventToEL(el){
+    addEventToEL(el, view){
         var DOMAttr = document.createAttribute('href');
         el.setAttributeNode( DOMAttr );
 
-        this.ev.add(el, 'click', function(ev){
+        view.addEv(el, 'click', function(ev){
             ev.preventDefault();
-            Router.go((this.modelRel instanceof zzReference)?this.modelRel.value:this.modelRel);
+            Router.go((this.modelRel instanceof zzReactive)?this.modelRel.value:this.modelRel);
         }.bind(this));
         
-        this.ev.add(this.modelRel, function(){
+        view.addEv(this.modelRel, 'change', function(){
             DOMAttr.value = this.getValue(this.modelRel.value);
         }, this);
         
         DOMAttr.value = this.getValue(this.modelRel.value);
     }
 
-    clearEvents(DOMel){
-        this.ev.off();
-    }
-        
     constructor(DOMFind, modelRel){
         super(DOMFind);
         
-        this.modelRel = new zzArrayRef(modelRel);
-        this.ev = new EventStack;
+        this.modelRel = new zzStringConcat(modelRel);
     }
 }
 
 class zzLinkRouteHref extends zzLinkFind{
-    addEventToEL(el){
-        this.ev.add(el, 'click', function(ev){
+    addEventToEL(el, view){
+        view.addEv(el, 'click', function(ev){
             ev.preventDefault();
             Router.go( el.getAttribute( 'href' ) );
         }.bind(this));
-    }
-
-    clearEvents(DOMel){
-        this.ev.off();
-    }
-        
-    constructor(DOMFind, modelRel){
-        super(DOMFind);
-        
-        this.ev = new EventStack;
     }
 }
 
@@ -571,8 +621,8 @@ module.exports = {
                 return isNaN(val)?undefined:val;
            });
         },
-        checkbox(DOMFind, modelRel, sets){
-           return this.link( new zzLinkCheckboxValue(DOMFind, modelRel, sets) );
+        checkbox(DOMFind, modelRel){
+           return this.link( new zzLinkCheckboxValue(DOMFind, modelRel) );
         },
         radio(DOMFind, modelRel, sets){
            return this.link( new zzLinkCheckboxValue(DOMFind, modelRel, sets) );
@@ -580,8 +630,11 @@ module.exports = {
         select(DOMFind, modelRel, className, attrName){
            return this.link( new zzLinkSelectValue(DOMFind, modelRel, className, attrName) );
         },
-        autoResizeTextarea(DOMFind){
-           return this.link( new zzLinkAutoResizeTextarea(DOMFind) );
+        elements(DOMFind, initFn, destroyFn){
+            return this.link( new zzLinkElements(DOMFind, initFn, destroyFn) );
+        },
+        autoResizeTextarea(DOMFind, modelRel){
+           return this.link( new zzLinkAutoResizeTextarea(DOMFind, modelRel) );
         },
         text(DOMFind, modelRel, append){
            return this.link( new zzLinkTextValue(DOMFind, modelRel, append) );
@@ -599,7 +652,7 @@ module.exports = {
             return this.link( new zzLinkStyleValue(DOMFind, modelRel) );
         },
         class(DOMFind, modelRel){
-            if (typeof modelRel === 'string' || modelRel instanceof zzReference){
+            if (typeof modelRel === 'string' || modelRel instanceof zzReactive || Array.isArray(modelRel)){
                 return this.link( new zzLinkClassValue(DOMFind, modelRel) );
             }else{
                 return this.link( new zzLinkClassObjectValue(DOMFind, modelRel) );
@@ -608,8 +661,8 @@ module.exports = {
         click(DOMFind, fn, self){
             return this.link( new zzLinkClick(DOMFind, fn, self) );
         },
-        if(DOMFind, modelRel){
-            return this.link( new zzLinkIf(DOMFind, modelRel) );
+        if(DOMFind, modelRel, inverse){
+            return this.link( new zzLinkIf(DOMFind, modelRel, inverse) );
         },
         route(DOMFind, data){
             if (data === undefined){

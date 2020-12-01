@@ -1,4 +1,10 @@
-const {Data} = require('../index');
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
+const {Event} = require('../Event');
 
 class Route{
     static trimPath(path){
@@ -70,17 +76,40 @@ class Route{
     runWildCard(){}
     
     add(route, listener, self){
-        return this.Router.add(this.route+'/'+route, listener, self);
+        return this.Router.add(this.route+'/'+this.Router.toUrl(route), listener, self);
     }
     
     exactMatch(route, listener, self){
-        return this.Router.exactMatch(this.route+'/'+route, listener, self);
+        return this.Router.exactMatch(this.route+'/'+this.Router.toUrl(route), listener, self);
+    }
+    
+    until(route, listener, self){
+        return this.Router.until(this.route+'/'+this.Router.toUrl(route), listener, self);
     }
     
     noMatch(listener, self){
         return this.Router.noMatch(listener, self);
     }
     
+    addRoutes(routes){
+        for (let route of routes){
+            switch (route.type){
+                case 'exact':
+                    this.exactMatch(route.route, route.controller);
+                    break;
+                case 'until':
+                    this.until(route.route, route.controller);
+                    break;
+                case 'nomatch':
+                    this.noMatch(route.controller);
+                    break;
+                default: 
+                    this.add(route.route, route.controller);
+                    break;
+            }
+        }
+    }
+        
     constructor(router, route, listener, self){
         this.Router = router;
         this.listener = listener;
@@ -152,7 +181,7 @@ class RouteNoMatch extends Route{
     }
 }
 
-class Router extends Data{
+class Router extends Event{
     __zzAddRoute(newRoute){
         this.routes.push(newRoute);
 
@@ -182,6 +211,25 @@ class Router extends Data{
         );
     }
 
+    addRoutes(routes){
+        for (let route of routes){
+            switch (route.type){
+                case 'exact':
+                    this.exactMatch(route.route, route.controller);
+                    break;
+                case 'until':
+                    this.until(route.route, route.controller);
+                    break;
+                case 'nomatch':
+                    this.noMatch(route.controller);
+                    break;
+                default: 
+                    this.add(route.route, route.controller);
+                    break;
+            }
+        }
+    }
+        
     until(route, fn, self){
         return this.__zzAddRoute(
             new RouteUntilEnd(this, this.toUrl(route), fn, self)
@@ -194,7 +242,7 @@ class Router extends Data{
         );
     }
 
-    onChange(fn, self){
+    change(fn, self){
         return this.on('change', fn, self);
     }
 
@@ -244,7 +292,7 @@ class Router extends Data{
                     route = route.route;
                 }
                 
-                if (typeof route === 'string'){
+                if (typeof route === 'string' || typeof route === 'number'){
                     return route;
                 }
 
@@ -274,9 +322,7 @@ class Router extends Data{
     }
 
     constructor(){
-        super({
-            path: null
-        });
+        super();
         
         this.routes = [];
         this.routeQueue = [];

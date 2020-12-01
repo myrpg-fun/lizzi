@@ -1,20 +1,21 @@
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
+ */
+
 const {ViewComponent, Loader} = require('./index');
-const {Data} = require('../index');
+const {zzString, zzObj} = require('../index');
+const {Event} = require('../Event');
 
-class zzTitleView extends ViewComponent{
+class zzDocumentView extends ViewComponent{
     __initDOM(T){
-        this.DOM = Loader(document).find('title');
+        this.DOM = Loader(document);
     }
 };
 
-class zzBodyView extends ViewComponent{
-    __initDOM(T){
-        this.DOM = Loader(document).find('body');
-    }
-};
-
-class MainApp extends Data{
-    main(field){
+class MainApp extends Event{
+    setView(field){
         this.app = field;
         
         return this;
@@ -27,21 +28,27 @@ class MainApp extends Data{
     }
     
     __initBody(){
-        new zzBodyView().view('body', this.ref('app')).addEvents();
-        new zzTitleView().text('title', this.ref('title')).addEvents();
+        new zzDocumentView()
+            .text(this.options.titleSelector, this.title)
+            .view(this.options.appSelector, this.app)
+            .addEvents();
     }
     
     constructor(options){
         super();
         
         options || (options = {});
+        options.appSelector || (options.appSelector = 'body');
+        options.titleSelector || (options.titleSelector = 'title');
         options.app || (options.app = null);
         options.title || (options.title = 'No title');
         
-        this.set(options);
+        this.options = options;
+        this.title = new zzString(options.title);
+        this.app = new zzObj(options.app);
         
         this.__initBody();
     }
 };
 
-module.exports = {MainApp};
+module.exports = {MainApp, zzDocumentView};

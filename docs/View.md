@@ -27,22 +27,17 @@ let {View, Loader} = require('lizzi/DOM');
             //event listener, this = thisField
         }, [...run_listener_with_this_arguments_when_Field_init])
         
-        /* append Field to element */
-        .view('.element', data.ref('field'))
-        .view('.element', T.createView("...") )
+        /* append ViewComponent to element */
+        .view('.element', view)
+        .view('.list', data, 'createFieldMethod')
         
-        /* append Collection of Data to element */
-        .collection('.list', new Collection, 'createFieldMethod')
-        .collection('.list', data.ref('collection'), 'createFieldMethod')
-        
-        /* append Collection to element */
-        .data('.list', new Data, 'createFieldMethod')
-        .data('.list', data.ref('data'), 'createFieldMethod')
+        /* append zzArray to element */
+        .array('.list', zzReactiveArray, 'createFieldMethod')
         
         /* Add text reference to element. */
-        .text('span', data.ref("string_variable"))
+        .text('span', zzReactiveString)
         .text('span', 'text string')
-        .text('span', ['array of strings', data.ref("and"), data.ref("variables")])
+        .text('span', ['joins strings ', and, variables, "."])
         
         /* Add html reference to element. */
         .html('div', data.ref("html_variable"))
@@ -77,23 +72,21 @@ let {View, Loader} = require('lizzi/DOM');
         ])
         
         /* add attribute reference to element */
-        .attr('.element', 'style', data.ref("style"))
         .attr('.element', {
             'href': data.ref("href"),
             'alt': [data.ref("alt"), ', but ', data.ref("altnot")]
         })
         
         /* add css style reference to element */
-        .style('.element', 'height', data.ref("height"))
         .style('.element', {
-            'height': [data.ref("height"), ' px'],
-            'width': data.ref("width")
+            'height': [height, ' px'],
+            'width': width
         })
         
         /* set class reference to element */
-        .class('.element', data.ref("classes"))
+        .class('.element', classes)
         .class('.element', {
-            'on': data.ref("ifTrue")
+            'on': ifTrue
         })
         
         /* set click function to element */
@@ -111,13 +104,16 @@ let {View, Loader} = require('lizzi/DOM');
         .select('a', Router.ref('path'), 'active', 'href')
         
         /* add to every element logic depends on data.values */
-        .elements('a', function(el, view){ /*...*/ }[, ...data.ref('values')])
+        .elements('a', function(el, view){ /* initialize */ }, function(el, view){ /* destroy */ })
         .elements('a', function(el){ 
             el.classList.remove('active');
             if (Router.path === el.getAttribute('href'))
                 el.classList.add('active');
-        }, Router.ref('path'))
-        
+        })
+
+        /*  */
+        .elements('a', new ViewElements(...))
+
         /* set init and remove function */
         .init(function(thisField){
             //on add field to DOM

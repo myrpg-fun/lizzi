@@ -1,147 +1,203 @@
-/*
- * Docs https://github.com/myrpg-fun/lizzi
+/**
+ * Copyright (c) Stanislav Shishankin
+ *
+ * This source code is licensed under the MIT license.
  */
 
-let {zzReference} = require('../zzReference');
-let {Collection, LazyCollection} = require('../index');
-let {Event} = require('../Event');
-let {zzLink, zzLinkFind} = require('./zzLink');
+let {zzArray, zzReactive} = require('../index');
+let {Event, EventStack} = require('../Event');
+let {zzLink, zzLinkFind, ViewElements} = require('./zzLink');
 
 class zzCollectionDOM{
-    replace(newValues){
-        let newViewComponent = [];
-        this.nodes.forEach((d, i) => d.data.__zzIndeX = i);
-        
-        if (newValues.length > 0){
-            let maxIndex = this.nodes.length;
-            let nodeBefore = null;
-            
-            let aValues;
-            
-            if (Array.isArray(newValues)){
-                aValues = newValues;
-            }else if (newValues instanceof LazyCollection || newValues instanceof Collection){
-                aValues = newValues.toArray();
-            }else{
-                aValues = [];
-            }
-            
-            for (let i = aValues.length - 1; i >= 0; i--){
-                let data = aValues[i];
-                
-                if (!data){
-                    continue;
-                }
-                
-                let node = null;
-                if ('__zzIndeX' in data){
-                    let index = data.__zzIndeX;
-                    node = this.nodes[index].node;
-                    
-                    if (index < maxIndex){
-                        maxIndex = index;
-                    }else{
-                        node.appendTo(this.DOM, nodeBefore);
-                    }
-                        
-                    delete data.__zzIndeX;
-                }else{
-                    if (data instanceof ViewComponent){
-                        node = data;
-                    }else if (data && data[this.fnname]){
-                        node = data[this.fnname].call(data);
-                    }
-                    
-                    if (node instanceof ViewComponent){
-                        node.appendTo(this.DOM, nodeBefore);
-                    }
-                }
-                
-                if (node instanceof ViewComponent){
-                    nodeBefore = node;
-//                    node.appendTo(this.DOM);
-
-                    newViewComponent.unshift({
-                        data: data,
-                        node: node
-                    });
-                }
-            };
+    appendTo(data, viewBefore){
+        let view;
+        if (data instanceof ViewComponent){
+            view = data;
+        }else if (typeof this.fnname === 'function'){
+            view = this.fnname.call(data, data);
+        }else if (data && data[this.fnname]){
+            view = data[this.fnname].call(data);
         }
         
-        let removeSort = this.nodes.slice(0);
-        for (let f of removeSort){
-            if ('__zzIndeX' in f.data){
-                delete f.data.__zzIndeX;
-                f.node.removeDOM();
-            }
-        }            
-        
-        this.nodes = newViewComponent;
+        if (view instanceof ViewComponent){
+            view.appendTo(this.DOM, viewBefore);
+        }
+        return view;
     }
     
-    remove(element, index){
-        if (this.nodes[index]){
-            if (this.nodes[index].data !== element){
-                console.error("Unsynced data found");
+    replace(){
+        let newValues = this.array.value;
+        let newViewComponent = new Map;
+        let maxIndex = this.views.length;
+        let viewBefore = null;
+        
+        for (let i = newValues.length - 1; i >= 0; i--){
+            let data = newValues[i];
+            
+            if (!data){
+                continue;
+            }
+            
+            let view = null;
+            let dataView = this.views.get(data);
+            if (dataView){
+                view = dataView.view;
+                
+                if (dataView.index < maxIndex){
+                    maxIndex = dataView.index;
+                }else{
+                    view.appendTo(this.DOM, viewBefore);
+                }
+
+                this.views.delete(data);
+            }else{
+                view = this.appendTo(data, viewBefore);
+            }
+            
+            if (view instanceof ViewComponent){
+                viewBefore = view;
+
+                newViewComponent.set(data, {
+                    view: view,
+                    index: i
+                });
+            }
+        };
+        
+        this.views.forEach((d) => d.view.removeDOM());
+        this.views.clear();
+        
+        this.views = newViewComponent;
+    }
+    
+    remove(event){
+        for (let data of event.removed){
+            let d = this.views.get(data);
+            if (d){
+                d.view.removeDOM();
+                this.views.delete(data);
+            }else{
+                console.error("Unsynced data found", data);
                 return;
             }
-            
-            this.nodes.splice(index, 1)[0].node.removeDOM();
         }
     }
     
-    add(data, idx){
-        if (data[this.fnname]){
-            let node = data[this.fnname].call(data);
-            if (node){
-                node.appendTo(this.DOM, this.nodes[idx]?this.nodes[idx].node:null);
+    add(event){
+        let idx = event.index;
+        let viewBefore = null;
+        if (idx < this.views.length){
+            for (let d of this.views){
+                if (d.index === idx){
+                    viewBefore = d.view;
+                }
 
-                this.nodes.splice(idx, 0, {
-                    data: data,
-                    node: node
+                if (d.index >= idx){
+                    d.index += event.added.length;
+                }
+            }
+        }
+
+        for (let i in event.added){
+            let data = event.added[i];
+            let view = this.appendTo(data, viewBefore);
+
+            if (view instanceof ViewComponent){
+                this.views.set(data, {
+                    view: view,
+                    index: idx + i
                 });
             }
         }
     }
     
     removeDOM(){
-        this.collection.off(this);
+        this.array.off(this);
 
-        this.nodes.forEach(function(node){
-            node.node.removeDOM();
-        });       
+        this.views.forEach(function(d){
+            d.view.removeDOM();
+        });
         
-        //this.DOM.remove();
-        this.collection = null;
+        this.array = null;
     }
     
-    connectDOM(collection){
-        if (!(collection instanceof Collection) && !(collection instanceof LazyCollection)){
-            console.error('Error: '+collection+' is not Collection');
+    connectDOM(array){
+        if (!(array instanceof zzArray)){
+            console.error('Error: '+collection+' is not zzArray');
             return;
         }
         
-        this.collection = collection;
-        this.collection.on('add', this.add, this);
-        this.collection.on('remove', this.remove, this);
-        this.collection.on('replace-values', this.replace, this);
-        this.replace( collection.elements, this );
+        this.array = array;
+        this.array.on('add', this.add, this);
+        this.array.on('remove', this.remove, this);
+        this.array.on('replace', this.replace, this);
+        this.replace( array.value );
     }
     
-    constructor(Template, collection, fnname){
-        this.nodes = [];
-        this.DOM = Template;
+    constructor(el, array, fnname, view){
+        this.views = new Map;
+        this.el = el;
+        this.DOM = new Template(el);
         this.fnname = fnname;
+        this.view = view;
         
-        this.connectDOM(collection);
+        this.connectDOM(array);
     }
 }
 
+class zzCollectionAnimationDOM extends zzCollectionDOM{
+    replace(newValues){        
+        let newViewComponent = [];
+        this.views.forEach((d, i) => d.data.__zzIndeX = i);
+                
+        if (newValues.length > 0){
+            for (let data of newValues){
+                if (!data){
+                    continue;
+                }
+                
+                let view = null;
+                if ('__zzIndeX' in data){
+                    view = this.views[data.__zzIndeX].view;
+                    delete data.__zzIndeX;
+                }else{
+                    if (data instanceof ViewComponent){
+                        view = data;
+                    }else if (data && data[this.fnname]){
+                        view = data[this.fnname].call(data);
+                    }
+                    
+                    if (view instanceof ViewComponent){
+                        //only if new
+                        view.appendTo(this.DOM);
+                    }
+                }
+                
+                if (view instanceof ViewComponent){
+                    newViewComponent.push({
+                        data: data,
+                        view: view
+                    });
+                }
+            };
+        }
+        
+        let removeSort = this.views;//.slice(0);
+        for (let f of removeSort){
+            if ('__zzIndeX' in f.data){
+                delete f.data.__zzIndeX;
+                f.view.removeDOM();
+            }
+        }            
+        
+        this.views = newViewComponent;
+    }
+};
+
 class zzLinkCollection extends zzLinkFind{
-    addEventToEL(el){
+    addEventToEL(el, view){
         this.added.push(
-            new zzCollectionDOM(new Template(el), this.collection, this.fnname)
+            new this.zzCollectionDOM(el, this.collection, this.fnname, view)
         );
     }
 
@@ -153,75 +209,19 @@ class zzLinkCollection extends zzLinkFind{
         this.added = [];
     }
 
-    constructor(DOMFind, collection, fnname){
+    constructor(DOMFind, zzCollectionDOM, collection, fnname){
         super(DOMFind);
         
-        if (!(collection instanceof Collection) && !(collection instanceof LazyCollection)){
-            console.error('Error: linked collection is not Collection');
+        if (!(collection instanceof zzArray)){
+            console.error('Error: linked array is not zzArray');
         }
         
+        this.zzCollectionDOM = zzCollectionDOM;
         this.collection = collection;
         this.fnname = fnname;
         this.added = [];
     }
-}
-
-class zzCollectionAnimationDOM extends zzCollectionDOM{
-    replace(newValues){        
-        let newViewComponent = [];
-        this.nodes.forEach((d, i) => d.data.__zzIndeX = i);
-                
-        if (newValues.length > 0){
-            for (let data of newValues){
-                if (!data){
-                    continue;
-                }
-                
-                let node = null;
-                if ('__zzIndeX' in data){
-                    node = this.nodes[data.__zzIndeX].node;
-                    delete data.__zzIndeX;
-                }else{
-                    if (data instanceof ViewComponent){
-                        node = data;
-                    }else if (data && data[this.fnname]){
-                        node = data[this.fnname].call(data);
-                    }
-                    
-                    if (node instanceof ViewComponent){
-                        //only if new
-                        node.appendTo(this.DOM);
-                    }
-                }
-                
-                if (node instanceof ViewComponent){
-                    newViewComponent.push({
-                        data: data,
-                        node: node
-                    });
-                }
-            };
-        }
-        
-        let removeSort = this.nodes;//.slice(0);
-        for (let f of removeSort){
-            if ('__zzIndeX' in f.data){
-                delete f.data.__zzIndeX;
-                f.node.removeDOM();
-            }
-        }            
-        
-        this.nodes = newViewComponent;
-    }
-}
-
-class zzLinkCollectionAnimation extends zzLinkCollection{
-    addEventToEL(el){
-        this.added.push(
-            new zzCollectionAnimationDOM(new Template(el), this.collection, this.fnname)
-        );
-    }
-}
+};
 
 class zzLinkData extends zzLinkFind{
     async removeDOM(){
@@ -238,123 +238,124 @@ class zzLinkData extends zzLinkFind{
     
     addDOM(data, el){
         if (data && data[this.fnname]){
-            const node = data[this.fnname].call(data);
+            const view = data[this.fnname].call(data);
 
-            if (node instanceof ViewComponent){
-                node.appendTo(el);
+            if (view instanceof ViewComponent){
+                view.appendTo(el);
                 
                 this.added.push(
-                    node
+                    view
                 );
             }
         }
     }
     
     addEventToEL(el){
-        const DataRef = this.modelRel;
+        const value = this.var;
         
-        if (DataRef instanceof zzReference){
-            const data = DataRef.value;
+        if (value instanceof zzReactive){
+            const data = value.value;
             this.addDOM(data, el);
 
             let inside = false;
-            DataRef.onSet(async function(){
+            value.change(async function(){
                 if (!inside){
                     inside = true;
                     await this.removeDOM();
 
-                    this.addDOM(DataRef.value, el);
+                    this.addDOM(value.value, el);
                     inside = false;
                 }
             }, this);
         }else{
-            this.addDOM(DataRef, el);
+            this.addDOM(value, el);
         }
     }
 
     clearEvents(DOMel){
-        if (this.modelRel){
-            this.modelRel.off(this);
+        if (this.var instanceof zzReactive){
+            this.var.off(this);
         }
+        this.removeDOM();
     }
 
-    constructor(DOMFind, modelRel, fnname){
+    constructor(DOMFind, value, fnname){
         super(DOMFind);
         
-        this.modelRel = modelRel;
+        this.var = value;
         this.fnname = fnname;
         this.added = [];
     }
 }
 
 class zzLinkViewComponent extends zzLinkFind{
-    async removeDOM(node){
-        if (node instanceof ViewComponent){
-            await node.removeDOM();
+    async removeDOM(view){
+        if (view instanceof ViewComponent){
+            await view.removeDOM();
         }
     }
     
-    addDOM(node, el){
-        if (node instanceof ViewComponent){
-            node.appendTo(el);
+    addDOM(view, el){
+        if (view instanceof ViewComponent){
+            view.appendTo(el);
         }
     }
     
     addEventToEL(el){
-        const node = this.node;
+        const view = this.view;
         
-        if (node instanceof zzReference){
-            this.addDOM(node.value, el);
+        if (view instanceof zzReactive){
+            this.addDOM(view.value, el);
 
             let inside = false;
-            node.onSet(async function(ev){
+            view.change(async function(ev){
                 if (!inside){
                     inside = true;
                     if (ev.last instanceof ViewComponent){
                         await this.removeDOM(ev.last);
                     }
 
-                    this.addDOM(node.value, el);
+                    this.addDOM(view.value, el);
                     inside = false;
                 }
             }, this);
-        }else if(node instanceof ViewComponent){
-            this.addDOM(node, el);
+        }else if(view instanceof ViewComponent){
+            this.addDOM(view, el);
         }
     }
 
     clearEvents(){
-        const node = this.node;
+        const view = this.view;
         
-        if (node instanceof zzReference){
-            this.removeDOM(node.value);
-            node.off(this);
-        }else if(node instanceof ViewComponent){
-            this.removeDOM(node);
+        if (view instanceof zzReactive){
+            this.removeDOM(view.value);
+            view.off(this);
+        }else if(view instanceof ViewComponent){
+            this.removeDOM(view);
         }
     }
 
-    constructor(DOMFind, node){
+    constructor(DOMFind, view){
         super(DOMFind);
         
-        if (!(node instanceof ViewComponent || node instanceof zzReference)){
-            console.error('Error: linked node is not ViewComponent or not zzReference');
+        if (!(view instanceof ViewComponent || view instanceof zzReactive)){
+            console.error('Error: linked view is not ViewComponent or not zzReactive');
         }
         
-        this.node = node;
+        this.view = view;
     }
 }
 
 class zzInitialize extends zzLink{
-    addEvents(DOMnode){
+    addEvents(view){
         if (this.initFn){
-            this.initFn(DOMnode);
+            view.afterAppend(this.initFn);
         }
     }
 
-    async clearEvents(DOMnode){
+    async clearEvents(view){
         if (this.destroyFn){
-            await this.destroyFn(DOMnode);
+            await this.destroyFn(view);
         }
     }
 
@@ -368,22 +369,18 @@ class zzInitialize extends zzLink{
 
 class zzLinkOn extends zzLink{
     addEvents(view){
-        if (typeof this.self === 'string'){
-            this.self = view.find(this.self).elements[0];
-        }
-        
-        let fn = this.self.on || this.self.addEventListener || this.self.addListener;
-        
-        this.initEv = fn(this.eventName, this.listenerFn.bind(view));
-        if (this.isRun){
-            this.listenerFn.apply(view, this.isRun);
+        if (this.self){
+            let ev = view.addEv(this.self, this.eventName, this.listenerFn);
+
+            if (this.isRun){
+                ev.run(this.isRun);
+            }
         }
     }
 
-    clearEvents(view){
-        if (this.initEv){
-            let fn = this.initEv.off || this.initEv.removeEventListener || this.initEv.removeListener;
-            fn(this.eventName, this.listenerFn);
+    linkToView(view){
+        if (typeof this.self === 'string'){
+            this.self = view.find(this.self)[0];
         }
     }
 
@@ -391,9 +388,9 @@ class zzLinkOn extends zzLink{
         super();
         
         this.initEv = null;
+        this.self = self;
         this.listenerFn = listenerFn;
         this.eventName = eventName;
-        this.self = self;
         this.isRun = isRun;
     }
 }
@@ -446,10 +443,13 @@ class Template{
         if (typeof template === 'string'){
             if (template.indexOf('<') !== -1){
                 try {
-                    template = (new DOMParser).parseFromString(template, 'text/html');
+                    /*template = (new DOMParser).parseFromString(template, 'text/html');
                     return []
                         .concat(Array.prototype.slice.call(template.head.childNodes))
-                        .concat(Array.prototype.slice.call(template.body.childNodes));
+                        .concat(Array.prototype.slice.call(template.body.childNodes));*/
+                    var tmp = document.implementation.createHTMLDocument();
+                    tmp.body.innerHTML = template;
+                    return tmp.body.children;
                 }catch(err){
                     console.error(err);
                     return [];
@@ -512,6 +512,27 @@ class Template{
         return this;
     }
     
+    getBoundingClientRect(){
+        let rect = {
+            left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity
+        };
+        
+        for (let el of this.__zzElements){
+            if (el.getBoundingClientRect){
+                let box = el.getBoundingClientRect();
+                rect.left = Math.min(box.left, rect.left);
+                rect.top = Math.min(box.top, rect.top);
+                rect.right = Math.max(box.right, rect.right);
+                rect.bottom = Math.max(box.bottom, rect.bottom);
+            }
+        }
+        
+        rect.height = rect.bottom - rect.top;
+        rect.width = rect.right - rect.left;
+        
+        return rect;
+    }
+    
     remove(){
         for (let el of this.__zzElements){
             if (el.parentNode){
@@ -570,10 +591,28 @@ class ViewComponent extends Event{
 
             this.DOM.remove();
             this.__zzRemoveDOM = true;
+
+            this.emit('after-dom-removed');
         }
         return this;
     }
-    
+
+    __zzAppend(DOMElement, BeforeElement){
+        if (this.__zzClearEvents === null){
+            this.once('after-dom-removed', this.__zzAppend.bind(this, DOMElement, BeforeElement), this);            
+        }else{ 
+            DOMElement.appendBefore( this.DOM, BeforeElement );
+            if (this.__zzClearEvents === false){
+                this.addEvents();
+            }
+            this.emit('after-append', this);
+        }
+    }
+
+    afterAppend(fn){
+        this.once('after-append', fn);
+    }
+
     appendTo(DOMElement, BeforeElement){
         if (!(DOMElement instanceof Template)){
             DOMElement = new Template(DOMElement);
@@ -584,18 +623,22 @@ class ViewComponent extends Event{
                 BeforeElement = BeforeElement.DOM;
             }
             
-            this.addEvents();
-
-            DOMElement.appendBefore( this.DOM, BeforeElement );
+            this.__zzAppend(DOMElement, BeforeElement);
         }
     }
     
-    collection(DOMFind, collection, fnname, animation){
+    getBoundingClientRect(){
+        return this.DOM.getBoundingClientRect();
+    }
+    
+    array(DOMFind, collection, fnname, animation){
         if (animation === true){
-            return this.link( new zzLinkCollectionAnimation(DOMFind, collection, fnname) );
+            return this.link( new zzLinkCollection(DOMFind, zzCollectionAnimationDOM, collection, fnname) );
+        }else if (!animation){
+            return this.link( new zzLinkCollection(DOMFind, zzCollectionDOM, collection, fnname) );
+        }else{
+            return this.link( new zzLinkCollection(DOMFind, animation, collection, fnname) );
         }
-        
-        return this.link( new zzLinkCollection(DOMFind, collection, fnname) );
     }
     
     view(DOMFind, component){
@@ -610,31 +653,33 @@ class ViewComponent extends Event{
         return this.link( new zzInitialize(initFn, destroyFn) );
     }
     
-    on(self, eventName, listenerFn, isRun){
+    event(self, eventName, listenerFn, isRun){
         return this.link( new zzLinkOn(self, eventName, listenerFn, isRun) );
     }
     
+    router(route, fn){
+        return this.link( new zzLinkRouter(route, fn) );
+    }
+
     /* main class*/
     link(zzLinkEvent){
         if (zzLinkEvent instanceof zzLink){
-            this.events.push(zzLinkEvent);
-            zzLinkEvent.linkToView(this);
+            this.__events.push(zzLinkEvent);
         }
+        
+        zzLinkEvent.linkToView(this);
+
         return this;
     }
     
     addEvents(){
-        if (this.__zzClearEvents === false){
-            this.emit('add-events', this);
-            for (let eventFn of this.events){
-                eventFn.addEvents(this);
-            }
-            
-            this.__zzClearEvents = true;
-            this.emit('after-add-events', this);
-        }else if (this.__zzClearEvents === null){
-            this.once('after-clear-events', this.addEvents, this);            
+        this.emit('add-events', this);
+        for (let eventFn of this.__events){
+            eventFn.addEvents(this);
         }
+        
+        this.__zzClearEvents = true;
+        this.emit('after-add-events', this);
         
         return this;
     }
@@ -643,13 +688,14 @@ class ViewComponent extends Event{
         if (this.__zzClearEvents === true){
             this.__zzClearEvents = null;
             
-            this.emit('clear-events', this);
-            for (let eventFn of this.events){
+//            this.emit('clear-events', this);
+            this.__eventStack.off();
+            for (let eventFn of this.__events){
                 await eventFn.clearEvents(this);
             }
             
             this.__zzClearEvents = false;
-            this.emit('after-clear-events', this);
+//            this.emit('after-clear-events', this);
         }
         
         return this;
@@ -679,18 +725,25 @@ class ViewComponent extends Event{
     
     __initDOM(T){
         this.DOM = new Template(T).children().clone();
-        
+        this.T = T;
     }
     
+    /**
+     * shortcut Add Event to View EventStack
+     */
+    addEv(){
+        return this.__eventStack.add.apply(this.__eventStack, arguments);
+    }
+
     /* Create Html DOM ViewComponent */
-    constructor(T, Data){
+    constructor(T){
         super();
         
         this.__zzRemoveDOM = true;
         this.__zzClearEvents = false;
-        this.Data = Data;
         
-        this.events = [];
+        this.__events = [];
+        this.__eventStack = new EventStack;
 
         this.__initDOM(T);
     }
@@ -702,4 +755,4 @@ function Loader(html){
     return new Template(html);
 }
 
-module.exports = {ViewComponent, Loader, zzLink, zzLinkFind};
+module.exports = {ViewComponent, ViewElements, Loader, zzLink, zzLinkFind, zzCollectionDOM, zzLinkCollection};
